@@ -1,4 +1,4 @@
-<p align ="center"><img src=SWUpdate.svg width=400 height=400 /></p>
+<p align ="center"><img src=logo.png width=400 height=400 /></p>
 
 RescueGUI - a simple GUI for SWUpdate in rescue mode
 ====================================================

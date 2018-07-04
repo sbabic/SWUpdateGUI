@@ -1,0 +1,11 @@
+APPLY = "Änderungen speichern";
+DHCP = "DHCP";
+IP_ADRESSE = "IP Adresse";
+NUMBER_OF_STEPS = "Anzahl der Schritte";
+CURRENT_STEP = "Aktueller Schritt";
+INSTALL_FROM_FILE = "Installierung von USB";
+NETWORK_SETUP = "Netzwerk Einstellungen";
+NETMASK = "Netzwerksmaske";
+REBOOT = "Neustart";
+NETWORK_INTERFACE = "Netzwerksschnittstelle";
+UPDATE_IN_PROGRESS = "Aktualisierung läuft";
