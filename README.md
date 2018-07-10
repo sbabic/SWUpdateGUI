@@ -39,3 +39,5 @@ License
 -------
 This project is licensed under GPL version 2.0+.
 
+
+<p align ="center"><img src=rescueGUIMain.jpg width=800 height=480 /></p>
