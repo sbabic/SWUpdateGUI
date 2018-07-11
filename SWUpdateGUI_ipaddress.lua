@@ -34,14 +34,26 @@ function IPAddress.new(class, self)
     button = ui.Button:new(addr)
     
     self.buttons[i] = ui.Button:new {
-      onClick = function(self)
-        val = tonumber(self.Text) + 1
+      incaddr = function(self, step)
+        val = tonumber(self.Text) + step
         if (val > 255) then
-          val = 1
+          val = val % 256
         end
         self:setValue("Text", tostring(val))                    
+      end,
+      onClick = function(self)
+        self:incaddr(1)
+        --val = tonumber(self.Text) + 1
+        --if (val > 255) then
+        --  val = 1
+        --end
+        --self:setValue("Text", tostring(val))                    
+      end,
+      onHold = function(self)
+        self:incaddr(10)
       end
-    }    
+    }
+    
     self.buttons[i].Text= "1"
     grp:addMember(self.buttons[i])
   end
