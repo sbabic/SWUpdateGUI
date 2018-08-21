@@ -228,28 +228,18 @@ local progwin = ui.Window:new
 	Status = "hide",  
 	HideOnEscape = true,
 	SizeButton = true,
-  interval = 0,
   show = function(self)
     ui.Window.show(self)
     self.Window:addInputHandler(ui.MSG_KEYDOWN, self, self.keypressed)
-    self.Window:addInputHandler(ui.MSG_INTERVAL, self, self.tick)
-    self.interval = 0
   end,
   hide = function(self)
     ui.Window.hide(self)
     self.Window:remInputHandler(ui.MSG_KEYDOWN, self, self.keypressed)
-    self.Window:remInputHandler(ui.MSG_INTERVAL, self, self.tick)
   end,
   keypressed = function(self)
     self.Window:hide() 
     w = self:getById("MainWindow")
     w:setValue("Status", "show")
-  end,
-  tick = function(self)
-    self.interval = self.interval + 1
-    if ((self.interval % 50) == 0) then
-      print(self.interval)
-    end
   end,
 	Children = 
   {
