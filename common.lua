@@ -20,13 +20,12 @@ function RescueGUIHeader.new(class, self)
   self.title = ui.Text:new
   {
     Text = self.Description or "",
-    Style = "font: ui-xx-large/bi;"
   }
     
   self.logo =  ui.ImageWidget:new 
   {
     Width = "fill",
-    Height = "100",
+    Height = "fill",
     Mode = "inert",
     Image = self.Image,
     HAlign = "center",

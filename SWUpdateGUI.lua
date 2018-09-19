@@ -159,7 +159,7 @@ function updnetinterfaces()
         Text = t["name"] .. ": " .. t["addr"] .. " " .. t["netmask"],
         HAlign = "left",
         Height = "auto",
-        Style = "font: ui-xx-large/bi; text-align:left"
+        Style = "text-align:left"
       }
       elem = app:getById("net-" .. t["name"])
       if elem then 
@@ -523,16 +523,14 @@ app = ui.Application:new
     
     if status == STATUS_RUN then
       g:setValue("Text", L.UPDATE_IN_PROGRESS)
-      g:setValue("Style", "font: ui-xx-large/bi;")
     elseif status == STATUS_FAILURE then
       g:setValue("Text", L.FAILURE)
-      g:setValue("Style", "font: ui-xx-large/bi; color: #ff0000;")
+      g:setValue("Style", "color: #ff0000;")
     elseif status == STATUS_SUCCESS then
       g:setValue("Text", L.SUCCESS)
-      g:setValue("Style", "font: ui-xx-large/bi; color: #00ff00;")
+      g:setValue("Style", "color: #00ff00;")
     elseif status == STATUS_START then
       g:setValue("Text", L.STARTING_UPDATE)
-      g:setValue("Style", "font: ui-xx-large/bi;")
     else
             
     end
@@ -566,7 +564,6 @@ app = ui.Application:new
               VAlign = "center",
               Height = "auto",
               InitialFocus = true,
-              Style = "font: ui-xx-large/bi;",
               
               onClick = function(self)
                 local app = self.Application
@@ -598,7 +595,6 @@ app = ui.Application:new
               VAlign = "center",
               Width = "fill",
               Height = "auto",
-              Style = "font: ui-xx-large/bi;",
               onClick = function(self)
                 app:switchwindow("MainWindow", "network-window")
               end,
@@ -610,7 +606,6 @@ app = ui.Application:new
               HAlign = "center",
               Width = "fill",
               Height = "auto",
-              Style = "font: ui-xx-large/bi;",
               onClick = function(self)
                 if not NOREBOOT then
                   os.execute ("/sbin/reboot")
