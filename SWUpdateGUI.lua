@@ -65,6 +65,7 @@ APP_ID = "SWUpdate-GUI"
 VENDOR = "SWUpdate"
 LOGO = "images/logo.png"
 LANG = "en"
+MEDIA = "/media"
 
 -- TODO: is it necessary or better use just config.lua ?
 local ARGTEMPLATE = "-r=rotate/N,--help=HELP/S,-l=LOCALE/S"
@@ -572,7 +573,7 @@ app = ui.Application:new
                   {
                     Center = true,
                     Height = 200,
-                    BasePath = "/media",
+                    BasePath = MEDIA,
                     Path = "*.swu",
                     SelectMode = "single",
                     DisplayMode = "all"
@@ -581,7 +582,7 @@ app = ui.Application:new
                   if (status == "selected" and files[1]) then
                     local swufile = files[1]
                     if (swufile) then 
-                      os.execute("swupdate-client /media" .. path .. "/" .. swufile .. " &")
+                      os.execute("swupdate-client " .. MEDIA .. path .. "/" .. swufile .. " &")
                     end
                   end
                 end)
