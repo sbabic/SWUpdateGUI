@@ -448,7 +448,15 @@ local netwin = NetWindow:new
               end)
             end
           end
-				}
+				},
+        ui.Button:new 
+        { 
+          Id = "cancel-button", 
+          Text = L.CANCEL,
+          onClick = function(self)
+            app:switchwindow("network-window", "MainWindow")
+          end
+        }
       }
     }
   }
