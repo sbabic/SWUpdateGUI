@@ -184,8 +184,10 @@ end
 function loadnetinterfaces()
   local runintf = sw:ipv4()
   local gw = getgatewayip()
-  
-  runintf[INTF_GATEWAY] = gw .. " 0.0.0.0"
+
+  if gw then
+     runintf[INTF_GATEWAY] = gw .. " 0.0.0.0"
+  end
   
   if NETWORK_INTERFACES then
     for cnt=1, #NETWORK_INTERFACES do
