@@ -295,6 +295,15 @@ local progwin = ui.Window:new
               Id = "message-box",
             }
           }
+        },
+        ui.Button:new
+        {
+          Id = "progress-cancel-button",
+          Text = L.BACK,
+          Disabled = true,
+          onClick = function(self)
+            app:switchwindow("network-window", "MainWindow")
+          end
         }
 			}
 		}
@@ -489,6 +498,8 @@ app = ui.Application:new
   msgUser = function(self,msg)
     local prog = msg[-1]
     self:switchtoprog(self)
+    g = self:getById("progress-cancel-button")
+    g:setValue("Disabled", true)
     t = {}
     for field in string.gmatch(prog, "%S+" ) do
       k,v = string.match(field, "(%a+)=\'(.*)\'")
@@ -537,9 +548,13 @@ app = ui.Application:new
     elseif status == STATUS_FAILURE then
       g:setValue("Text", L.FAILURE)
       g:setValue("Style", "color: #ff0000;")
+      g = self:getById("progress-cancel-button")
+      g:setValue("Disabled", false)
     elseif status == STATUS_SUCCESS then
       g:setValue("Text", L.SUCCESS)
       g:setValue("Style", "color: #00ff00;")
+      g = self:getById("progress-cancel-button")
+      g:setValue("Disabled", false)
     elseif status == STATUS_START then
       g:setValue("Text", L.STARTING_UPDATE)
     else
