@@ -21,17 +21,19 @@ function RescueGUIHeader.new(class, self)
   {
     Text = self.Description or "",
   }
-    
-  self.logo =  ui.ImageWidget:new 
-  {
-    Width = "fill",
-    Height = "fill",
-    Mode = "inert",
-    Image = self.Image,
-    HAlign = "center",
-  }
   grp:addMember(self.title)
-  grp:addMember(self.logo)
+  
+  if self.Image then
+    self.logo =  ui.ImageWidget:new 
+    {
+      Width = "fill",
+      Height = "fill",
+      Mode = "inert",
+      Image = self.Image,
+      HAlign = "center",
+    }
+    grp:addMember(self.logo)
+  end
   
   return grp
 end
