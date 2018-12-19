@@ -613,7 +613,6 @@ app = ui.Application:new
                 end)
               end
             },
-            ui.Spacer:new { },
             Button:new
             {
               Text = L.NETWORK_SETUP,
