@@ -627,7 +627,7 @@ app = ui.Application:new
 
             Button:new
             {
-              Text = L.REBOOT,
+              Text = L.RESTART,
               HAlign = "center",
               Width = "fill",
               Height = "auto",
