@@ -188,7 +188,6 @@ function updnetinterfaces()
   end
 end
 
-
 local function loadnetinterfaces()
   local runintf = sw:ipv4()
   local gw = getgatewayip()
@@ -390,6 +389,8 @@ local netwin = NetWindow:new
       {
         Id = "network-list",
         SelectMode = "single",
+        SelectedLine = 1,
+        InitialFocus = true,
         ListObject = List:new
         {
           Id = "network-objects",
@@ -446,12 +447,12 @@ local netwin = NetWindow:new
             table.insert (line, ip)
             table.insert (line, netmask)
             local newval = { line }
-            list:changeItem(newval, list.CursorLine)
-            list:rethinkLayout(true, 1)
             ifup(interfaces)
             
             -- Reload values from kernel to check if they were set
             loadnetinterfaces()
+            list:changeItem(newval, list.CursorLine)
+            list:rethinkLayout(true, 1)
             
             if SAVEIPADDRESS then
               app:addCoroutine(function()
@@ -659,6 +660,11 @@ app = ui.Application:new
               Height = "auto",
               onClick = function(self)
                 app:switchwindow("MainWindow", "network-window")
+                local g = app:getById("network-list")
+                if g:getN(g) > 0 then
+                  g:setValue("SelectedLine", g:getItem(1), true)
+                  g:moveLine(1, true)
+                end
               end,
             },
 
