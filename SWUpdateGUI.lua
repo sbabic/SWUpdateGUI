@@ -140,16 +140,32 @@ function getgatewayip()
 end
 
 -- Update an entry in the interface table
-function modinterface(name, dhcp, addr, netmask)
+
+function findintf(name)
   for _, t in pairs(interfaces) do
     if t["name"] == name then
-      t["dhcp"] = dhcp
-      t["addr"] = addr
-      t ["netmask"] = netmask
+      return t
     end
   end
+  return nil
 end
 
+function modinterface(name, dhcp, addr, netmask)
+  t = findintf(name)
+  if t then
+    t["dhcp"] = dhcp
+    t["addr"] = addr
+    t["netmask"] = netmask
+  else
+    t = {}
+    t["name"] = name
+    t["dhcp"] = false
+    t["addr"] = addr
+    t["netmask"] = netmask
+    table.insert(interfaces, t)
+  end
+end
+  
 function updnetinterfaces()
   local netgroup = app:getById("interfaces-group")
   for _, t in pairs(interfaces) do
@@ -172,27 +188,11 @@ function updnetinterfaces()
   end
 end
 
-function findintf(name)
-  for _, t in pairs(interfaces) do
-    if t["name"] == name then
-      return t
-    end
-  end
-  return nil
-end
 
 local function loadnetinterfaces()
   local runintf = sw:ipv4()
   local gw = getgatewayip()
 
-  local function createinterfaces(name, addr, netmask)
-    t = {}
-    t["name"] = name
-    t["dhcp"] = false
-    t["addr"] = addr
-    t["netmask"] = netmask
-    table.insert(interfaces, t)
-  end
 
   if NETWORK_INTERFACES then
     for cnt=1, #NETWORK_INTERFACES do
@@ -211,14 +211,14 @@ local function loadnetinterfaces()
     if not netmask then netmask = "" end
 
     if not intf then
-      createinterfaces(name, addr, netmask)
+      modinterface(name, false, addr, netmask)
     else
       intf["addr"] = addr
       intf["netmask"] = netmask
     end
   end
   if gw then
-     createinterfaces("Gateway", gw, "0.0.0.0")
+     modinterface("Gateway", false, gw, "0.0.0.0")
   end
 
   updnetinterfaces()
