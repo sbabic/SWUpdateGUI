@@ -483,6 +483,7 @@ app = ui.Application:new
 	ApplicationId = APP_ID,
   AuthorStyleSheets = STYLESHEETS,
   
+  -- This can be used in future to add some setup
   SWUpdateCfg = {
     
   },
@@ -593,11 +594,13 @@ app = ui.Application:new
               
               onClick = function(self)
                 local app = self.Application
+                local w, h = app:getById("MainWindow").Drawable:getAttrs("WH")
                 app:addCoroutine(function()
                   local status, path, files = app:requestFile
                   {
                     Center = true,
-                    Height = 200,
+                    Width = w - 40,
+                    Height = h - 40,
                     BasePath = MEDIA,
                     Path = "*.swu",
                     SelectMode = "single",
