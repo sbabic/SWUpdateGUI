@@ -569,6 +569,35 @@ app = ui.Application:new
     {
       Orientation = "vertical",
       Id = "MainWindow",
+      show = function(self)
+        ui.Window.show(self)
+        self.Window:addInputHandler(ui.MSG_KEYDOWN, self, self.keypressed)
+      end,
+      hide = function(self)
+        ui.Window.hide(self)
+        self.Window:remInputHandler(ui.MSG_KEYDOWN, self, self.keypressed)
+      end,
+  
+      -- In MainWindow, it is just possible to iterate the menu
+      keypressed = function(self, msg)
+        local fe = self.FocusElement
+        local key = msg[3]
+        local qual = msg[6]
+        local retrig = key ~= 0 and self.Application:setLastKey(key)
+        self:setValue("Active", true)
+
+        if qual == 0 and (key == 13 or key == 32) and not retrig then
+          if fe and not fe.Active then
+            self:setHiliteElement(fe)
+            self:setActiveElement(fe)
+          end
+        elseif (key == 9 and qual == 0) or key == 61459 then
+          self:setFocusElement(self:getNextElement(fe))
+        elseif (key == 9 and (qual >=1 and qual <= 3)) or key == 61458 then
+          self:setFocusElement(self:getNextElement(fe, true))
+        end
+      end,
+
       Children =
       {
         RescueGUIHeader:new 
