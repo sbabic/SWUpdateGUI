@@ -2,7 +2,7 @@
 
 --	GUI for SWUPdate Rescue mode
 --	
---	(C) Copyright 2018
+--	(C) Copyright 2018 - 2019
 --	Stefano Babic, DENX Software Engineering, sbabic@denx.de.
 --
 --	SPDX-License-Identifier:     GPL-2.0-or-later
@@ -25,7 +25,7 @@ STATUS_FAILURE = 4
 STATUS_DONE = 6
 
 -- interface name for default Gateway
-INTF_GATEWAY = "DefaultGateway"
+INTF_GATEWAY = "Gateway"
 
 -- Check for components outside this project
 -- they must be available, else an error is reported
@@ -181,14 +181,19 @@ function findintf(name)
   return nil
 end
 
-function loadnetinterfaces()
+local function loadnetinterfaces()
   local runintf = sw:ipv4()
   local gw = getgatewayip()
 
-  if gw then
-     runintf[INTF_GATEWAY] = gw .. " 0.0.0.0"
+  local function createinterfaces(name, addr, netmask)
+    t = {}
+    t["name"] = name
+    t["dhcp"] = false
+    t["addr"] = addr
+    t["netmask"] = netmask
+    table.insert(interfaces, t)
   end
-  
+
   if NETWORK_INTERFACES then
     for cnt=1, #NETWORK_INTERFACES do
       local name = NETWORK_INTERFACES[cnt]
@@ -198,6 +203,7 @@ function loadnetinterfaces()
     end
   end
   
+
   for name,v in pairsByKeys (runintf) do
     local intf = findintf(name)
     local addr,netmask = string.match(v, "(.*) (.*)")
@@ -205,17 +211,16 @@ function loadnetinterfaces()
     if not netmask then netmask = "" end
 
     if not intf then
-      t = {}
-      t["name"] = name
-      t["dhcp"] = false
-      t["addr"] = addr
-      t["netmask"] = netmask
-      table.insert(interfaces, t)
+      createinterfaces(name, addr, netmask)
     else
       intf["addr"] = addr
       intf["netmask"] = netmask
     end
   end
+  if gw then
+     createinterfaces("Gateway", gw, "0.0.0.0")
+  end
+
   updnetinterfaces()
 end
 
@@ -725,6 +730,7 @@ netwin:loadinterfaces()
 progwin:setValue("Status", "hide")
 netwin:setValue("Status", "hide")
 app:addMember(progwin)
+
 app:run()
 
 progtask:terminate()
