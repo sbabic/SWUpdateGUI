@@ -336,6 +336,7 @@ function NetWindow:setRecord(fields)
   end
   
   net:setip(dhcp,checkip(fields[3], "192.168.0.1"), checkip(fields[4], "255.255.255.0"))
+  net:enable(dhcp)
   if (fields[1] == INTF_GATEWAY) then
     net:setip(dhcp,checkip(fields[3], "192.168.0.1"), "0.0.0.0")
     net:justaddress()
@@ -670,6 +671,8 @@ app = ui.Application:new
                   g:setValue("SelectedLine", g:getItem(1), true)
                   g:moveLine(1, true)
                 end
+                g = app:getById("network-fields")
+                g:deactivate()
               end,
             },
 

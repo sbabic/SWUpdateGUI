@@ -101,7 +101,6 @@ function NetAddress.new(class, self, defaultip, defaultnetmask)
 	self = self or { }
 	self.Class = "netaddress"
 
-  print(defaultip, defaultnetmask)
   self.defaultip = defaultip
   self.defaultnetmask = defaultnetmask
   self.grp = ui.Group.new(class, self)
@@ -139,6 +138,12 @@ end
 function NetAddress:justaddress()
   self.dhcp:setValue("Disabled", true)
   self.ip:enable(true)
+  self.netmask:enable(false)
+end
+
+function NetAddress:deactivate()
+  self.dhcp:setValue("Disabled", true)
+  self.ip:enable(false)
   self.netmask:enable(false)
 end
 
