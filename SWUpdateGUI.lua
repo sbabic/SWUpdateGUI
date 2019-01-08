@@ -437,22 +437,27 @@ local netwin = NetWindow:new
             net = self:getById("network-fields")
             local dhcp, ip, netmask = net:getip()
             modinterface(name, dhcp, ip, netmask)
-            line = {}
-            table.insert (line, name)
-            if (dhcp) then
-              table.insert (line, "yes")
-            else
-              table.insert (line, "no")
-            end
-            table.insert (line, ip)
-            table.insert (line, netmask)
-            local newval = { line }
+            
+            -- Call OS to setup the network interfaces
             ifup(interfaces)
             
             -- Reload values from kernel to check if they were set
             loadnetinterfaces()
-            list:changeItem(newval, list.CursorLine)
-            list:rethinkLayout(true, 1)
+            local t = findintf(name)
+            if t then
+              line = {}
+              table.insert (line, name)
+              if t["dhcp"] then
+                table.insert (line, "yes")
+              else
+                table.insert (line, "no")
+              end
+              table.insert (line, t["addr"])
+              table.insert (line, t["netmask"])
+              local newval = { line }
+              list:changeItem(newval, list.CursorLine)
+              list:rethinkLayout(true, 1)
+            end
             
             if SAVEIPADDRESS then
               app:addCoroutine(function()
