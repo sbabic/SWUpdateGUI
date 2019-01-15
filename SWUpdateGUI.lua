@@ -456,7 +456,7 @@ local netwin = NetWindow:new
               table.insert (line, t["addr"])
               table.insert (line, t["netmask"])
               local newval = { line }
-              list:changeItem(newval, list.CursorLine)
+              list:changeItem(newval, list.SelectedLine)
               list:rethinkLayout(true, 1)
             end
             
