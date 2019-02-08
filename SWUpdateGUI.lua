@@ -516,8 +516,10 @@ app = ui.Application:new
     t = {}
     for field in string.gmatch(prog, "%S+" ) do
       k,v = string.match(field, "(%a+)=\'(.*)\'")
-      t[k] = v
-      print (k, "=", v)
+      if k then
+         t[k] = v
+         print (k, "=", v)
+      end
     end
     self:updateProgress(t)    
   end,
@@ -710,7 +712,7 @@ app = ui.Application:new
 
 
 -------------------------------------------------------------------------------
---	Progress task conecting to swupdate
+--	Progress task connecting to swupdate
 -------------------------------------------------------------------------------
 
 local progtask = exec.run(function()
