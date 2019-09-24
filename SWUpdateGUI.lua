@@ -385,7 +385,7 @@ local netwin = NetWindow:new
     {
       VSliderMode = "auto",
       HSliderMode = "auto",
-      Headers = {L.NETWORK_INTERFACE, L.DHCP, L.IP_ADDRESS, L.NETMASK},
+      Headers = {L.NETIF, L.DHCP, L.IP_ADDRESS, L.NETMASK},
       Child = ui.Lister:new
       {
         Id = "network-list",
