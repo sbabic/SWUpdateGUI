@@ -560,6 +560,7 @@ app = ui.Application:new
     
     if status == STATUS_RUN then
       g:setValue("Text", L.UPDATE_IN_PROGRESS)
+      g:setValue("Style", "color: #000000;")
     elseif status == STATUS_FAILURE then
       g:setValue("Text", L.FAILURE)
       g:setValue("Style", "color: #ff0000;")
