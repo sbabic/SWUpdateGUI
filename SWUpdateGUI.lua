@@ -189,15 +189,19 @@ function updnetinterfaces()
 end
 
 local function loadnetinterfaces()
-  local runintf = sw:ipv4()
+  -- read interface from hardware
+  local readintf = sw:ipv4()
   local gw = getgatewayip()
-
+  local runintf = {}
 
   if NETWORK_INTERFACES then
     for cnt=1, #NETWORK_INTERFACES do
       local name = NETWORK_INTERFACES[cnt]
-      if not runintf[name] then
+      if not readintf[name] then
+	-- interface not yet configured
         runintf[name] = ""
+      else
+        runintf[name] = readintf[name]
       end
     end
   end
