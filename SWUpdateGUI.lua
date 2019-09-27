@@ -544,6 +544,16 @@ app = ui.Application:new
   switchtoprog = function(self)
     self:switchwindow("MainWindow", "progress-window")
   end,
+  sendswu = function(self, list)
+    local cmd = "swupdate-client "
+    for i=1, #list do
+      cmd = cmd .. list[i] .. " "
+    end
+    if string.len(cmd) > 0 then
+      cmd = cmd .. " &"
+      os.execute(cmd)
+    end
+  end,
   
   updateProgress = function(self, prog)
     if not prog then return end
@@ -581,6 +591,8 @@ app = ui.Application:new
             
     end
   end,
+  
+  
 	Children =
 	{
 
@@ -657,8 +669,29 @@ app = ui.Application:new
                   print (status, path, files)
                   if (status == "selected" and files[1]) then
                     local swufile = files[1]
-                    if (swufile) then 
-                      os.execute("swupdate-client " .. MEDIA .. path .. "/" .. swufile .. " &")
+                    swulist = {}
+                    local count = 1
+                    local ext = swufile:match("[^.]+$")
+                    if ext == "swu" or ext == "upd" then
+                      if ext == "upd" then
+                        for line in io.lines(MEDIA .. path .. "/" .. swufile) do
+                          -- take first word
+                          for w in string.gmatch(line, "%g+") do
+                            swulist[count] = MEDIA .. path .. "/" .. w
+                            break
+                          end
+                          count = count + 1
+                        end
+                      else
+                        swulist[1] = MEDIA .. path .. "/" .. swufile
+                      end
+                      app:addCoroutine(function()
+                          app:sendswu(swulist)
+                          end)
+                    else
+                      app:addCoroutine(function()
+                        result = app:easyRequest(false, L.WRONG_FILE_SELECTED, L.EXIT)
+                      end)
                     end
                   end
                 end)
