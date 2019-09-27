@@ -32,8 +32,8 @@ INTF_GATEWAY = "Gateway"
 local lfs
 pcall(function() lfs = require "lfs" end)
 if not lfs then
-	print "This program requires the luafilesystem library."
-	return
+  print "This program requires the luafilesystem library."
+  return
 end
 local sw = require "lua_swupdate"
 if not sw then
@@ -71,19 +71,19 @@ MEDIA = "/media"
 local ARGTEMPLATE = "-r=rotate/N,--help=HELP/S,-l=LOCALE/S"
 local args = rdargs(ARGTEMPLATE, arg)
 if not args or args.help then
-	print(ARGTEMPLATE)
-	return
+  print(ARGTEMPLATE)
+  return
 end
 
 function lfs.readdir(path)
-	local dir, iter = lfs.dir(path)
-	return function()
-		local e
-		repeat
-			e = dir(iter)
-		until e ~= "." and e ~= ".."
-		return e
-	end
+  local dir, iter = lfs.dir(path)
+  return function()
+    local e
+    repeat
+      e = dir(iter)
+    until e ~= "." and e ~= ".."
+    return e
+  end
 end
 
 -- Try to load configuration file
@@ -120,9 +120,9 @@ end
 function convertip(ip)
   if not (#ip == 8) then return nil end
   val = string.format("%d.%d.%d.%d", tonumber("0x" .. string.sub(ip,7,8)),
-      tonumber("0x" .. string.sub(ip,5,6)),
-      tonumber("0x" .. string.sub(ip,3,4)),
-      tonumber("0x" .. string.sub(ip,1,2)))
+    tonumber("0x" .. string.sub(ip,5,6)),
+    tonumber("0x" .. string.sub(ip,3,4)),
+    tonumber("0x" .. string.sub(ip,1,2)))
   return val
 end
 
@@ -165,7 +165,7 @@ function modinterface(name, dhcp, addr, netmask)
     table.insert(interfaces, t)
   end
 end
-  
+
 function updnetinterfaces()
   local netgroup = app:getById("interfaces-group")
   for _, t in pairs(interfaces) do
@@ -198,14 +198,14 @@ local function loadnetinterfaces()
     for cnt=1, #NETWORK_INTERFACES do
       local name = NETWORK_INTERFACES[cnt]
       if not readintf[name] then
-	-- interface not yet configured
+        -- interface not yet configured
         runintf[name] = ""
       else
         runintf[name] = readintf[name]
       end
     end
   end
-  
+
 
   for name,v in pairsByKeys (runintf) do
     local intf = findintf(name)
@@ -221,7 +221,7 @@ local function loadnetinterfaces()
     end
   end
   if gw then
-     modinterface("Gateway", false, gw, "0.0.0.0")
+    modinterface("Gateway", false, gw, "0.0.0.0")
   end
 
   updnetinterfaces()
@@ -233,12 +233,12 @@ end
 
 local progwin = ui.Window:new
 {
-	Id = "progress-window",
-	Title = APP_ID .. " " .. VERSION,
-	Orientation = "vertical",
-	Status = "hide",  
-	HideOnEscape = true,
-	SizeButton = true,
+  Id = "progress-window",
+  Title = APP_ID .. " " .. VERSION,
+  Orientation = "vertical",
+  Status = "hide",  
+  HideOnEscape = true,
+  SizeButton = true,
   show = function(self)
     ui.Window.show(self)
     self.Window:addInputHandler(ui.MSG_KEYDOWN, self, self.keypressed)
@@ -252,7 +252,7 @@ local progwin = ui.Window:new
     w = self:getById("MainWindow")
     w:setValue("Status", "show")
   end,
-	Children = 
+  Children = 
   {
     RescueGUIHeader:new 
     { 
@@ -266,31 +266,31 @@ local progwin = ui.Window:new
       Style = "border-style:ridge; border-rim-width: 1; border-focus-width: 1; border-width: 4;",
       Text = L.UPDATE_IN_PROGRESS,
     },
-    
+
     Group:new
-		{
+    {
       Orientation = "vertical",
-			Children =
-			{
-				Gauge:new
-				{
-          Legend = L.NUMBER_OF_STEPS,
-					Min = 0,
-					Max = 100,
-          Height = 200,
-					Id = "slider-steps",
-          Text = "Progress"
-				},
+      Children =
+      {
         Gauge:new
-				{
-          Legend = L.CURRENT_STEP,
-					Min = 0,
-					Max = 100,
+        {
+          Legend = L.NUMBER_OF_STEPS,
+          Min = 0,
+          Max = 100,
           Height = 200,
-					Id = "slider-step",
+          Id = "slider-steps",
+          Text = "Progress"
+        },
+        Gauge:new
+        {
+          Legend = L.CURRENT_STEP,
+          Min = 0,
+          Max = 100,
+          Height = 200,
+          Id = "slider-step",
           Text = "Progress1"
-				},
-  
+        },
+
         ui.ScrollGroup:new
         {
           Legend = L.OUTPUT,
@@ -313,8 +313,8 @@ local progwin = ui.Window:new
             app:switchwindow("network-window", "MainWindow")
           end
         }
-			}
-		}
+      }
+    }
   }
 }
 
@@ -338,16 +338,16 @@ function NetWindow:setRecord(fields)
       return default
     end
   end
-  
+
   net:setip(dhcp,checkip(fields[3], "192.168.0.1"), checkip(fields[4], "255.255.255.0"))
   net:enable(dhcp)
   if (fields[1] == INTF_GATEWAY) then
     net:setip(dhcp,checkip(fields[3], "192.168.0.1"), "0.0.0.0")
     net:justaddress()
   end
-    
+
 end
- 
+
 function NetWindow:loadinterfaces()
   local list = self:getById("network-list")
   for _, t in pairs(interfaces) do
@@ -368,17 +368,17 @@ end
 
 local netwin = NetWindow:new
 {
-	Id = "network-window",
-	Title = APP_ID .. " " .. VERSION,
-	Orientation = "vertical",
-	Status = "hide",  
-	HideOnEscape = true,
-	SizeButton = true,
+  Id = "network-window",
+  Title = APP_ID .. " " .. VERSION,
+  Orientation = "vertical",
+  Status = "hide",  
+  HideOnEscape = true,
+  SizeButton = true,
   hide = function(self)
     ui.Window.hide(self)
     app:switchwindow("network-window", "MainWindow")
   end,
-	Children = 
+  Children = 
   {
     RescueGUIHeader:new 
     { 
@@ -419,15 +419,15 @@ local netwin = NetWindow:new
     {
       Orientation = "horizontal",
       SameSize = true,
-			Children =
-			{
-				ui.Button:new 
+      Children =
+      {
+        ui.Button:new 
         { 
           Id = "apply-button", 
           Text = L.APPLY,
-					onClick = function(self)
-						ui.Button.onClick(self)
-						local list = self:getById("network-list")
+          onClick = function(self)
+            ui.Button.onClick(self)
+            local list = self:getById("network-list")
             local line = list:getItem(list.SelectedLine)
             if not line then
               print("No interface selected, no change")
@@ -442,10 +442,10 @@ local netwin = NetWindow:new
             net = self:getById("network-fields")
             local dhcp, ip, netmask = net:getip()
             modinterface(name, dhcp, ip, netmask)
-            
+
             -- Call OS to setup the network interfaces
             ifup(interfaces)
-            
+
             -- Reload values from kernel to check if they were set
             loadnetinterfaces()
             local t = findintf(name)
@@ -463,17 +463,17 @@ local netwin = NetWindow:new
               list:changeItem(newval, list.SelectedLine)
               list:rethinkLayout(true, 1)
             end
-            
+
             if SAVEIPADDRESS then
               app:addCoroutine(function()
-                result = app:easyRequest(false, L.CONFIRM_SAVE_NETWORK, L.SAVE, L.CANCEL)
-                if result == 1 then
-                  SAVEIPADDRESS(interfaces)
-                end
-              end)
+                  result = app:easyRequest(false, L.CONFIRM_SAVE_NETWORK, L.SAVE, L.CANCEL)
+                  if result == 1 then
+                    SAVEIPADDRESS(interfaces)
+                  end
+                end)
             end
           end
-				},
+        },
         ui.Button:new 
         { 
           Id = "cancel-button", 
@@ -493,17 +493,17 @@ local netwin = NetWindow:new
 
 app = ui.Application:new
 {
-	ProgramName = "SWUpdate Rescue GUI",
-	Author = "Stefano Babic",
-	Copyright = "Copyright © 2018, Stefano Babic",
-	ApplicationId = APP_ID,
+  ProgramName = "SWUpdate Rescue GUI",
+  Author = "Stefano Babic",
+  Copyright = "Copyright © 2018, Stefano Babic",
+  ApplicationId = APP_ID,
   AuthorStyleSheets = STYLESHEETS,
-  
+
   -- This can be used in future to add some setup
   SWUpdateCfg = {
-    
+
   },
-  
+
   setup = function(self)
     ui.Application.setup(self)
     self.Application:addInputHandler(ui.MSG_USER, self, self.msgUser)
@@ -521,8 +521,8 @@ app = ui.Application:new
     for field in string.gmatch(prog, "%S+" ) do
       k,v = string.match(field, "(%a+)=\'(.*)\'")
       if k then
-         t[k] = v
-         print (k, "=", v)
+        t[k] = v
+        print (k, "=", v)
       end
     end
     self:updateProgress(t)    
@@ -554,7 +554,7 @@ app = ui.Application:new
       os.execute(cmd)
     end
   end,
-  
+
   updateProgress = function(self, prog)
     if not prog then return end
     for k,v in pairs(prog) do
@@ -569,9 +569,9 @@ app = ui.Application:new
     msg = self:getById("message-box")
     msg:setValue("Text", prog["artifact"])
     status = tonumber(prog["status"])
-    
+
     g = self:getById("progress-caption")
-    
+
     if status == STATUS_RUN then
       g:setValue("Text", L.UPDATE_IN_PROGRESS)
       g:setValue("Style", "color: #000000;")
@@ -588,13 +588,13 @@ app = ui.Application:new
     elseif status == STATUS_START then
       g:setValue("Text", L.STARTING_UPDATE)
     else
-            
+
     end
   end,
-  
-  
-	Children =
-	{
+
+
+  Children =
+  {
 
     ui.Window:new
     {
@@ -608,7 +608,7 @@ app = ui.Application:new
         ui.Window.hide(self)
         self.Window:remInputHandler(ui.MSG_KEYDOWN, self, self.keypressed)
       end,
-  
+
       -- In MainWindow, it is just possible to iterate the menu
       keypressed = function(self, msg)
         local fe = self.FocusElement
@@ -636,7 +636,7 @@ app = ui.Application:new
           Description = APP_ID .. " " .. VERSION,
           Image = LogoImage,
         },
-        
+
         Group:new
         {
           Orientation = "vertical",
@@ -651,50 +651,50 @@ app = ui.Application:new
               VAlign = "center",
               Height = "auto",
               InitialFocus = true,
-              
+
               onClick = function(self)
                 local app = self.Application
                 local w, h = app:getById("MainWindow").Drawable:getAttrs("WH")
                 app:addCoroutine(function()
-                  local status, path, files = app:requestFile
-                  {
-                    Center = true,
-                    Width = w - 40,
-                    Height = h - 40,
-                    BasePath = MEDIA,
-                    Path = "*.swu",
-                    SelectMode = "single",
-                    DisplayMode = "all"
-                  }
-                  print (status, path, files)
-                  if (status == "selected" and files[1]) then
-                    local swufile = files[1]
-                    swulist = {}
-                    local count = 1
-                    local ext = swufile:match("[^.]+$")
-                    if ext == "swu" or ext == "upd" then
-                      if ext == "upd" then
-                        for line in io.lines(MEDIA .. path .. "/" .. swufile) do
-                          -- take first word
-                          for w in string.gmatch(line, "%g+") do
-                            swulist[count] = MEDIA .. path .. "/" .. w
-                            break
+                    local status, path, files = app:requestFile
+                    {
+                      Center = true,
+                      Width = w - 40,
+                      Height = h - 40,
+                      BasePath = MEDIA,
+                      Path = "*.swu",
+                      SelectMode = "single",
+                      DisplayMode = "all"
+                    }
+                    print (status, path, files)
+                    if (status == "selected" and files[1]) then
+                      local swufile = files[1]
+                      swulist = {}
+                      local count = 1
+                      local ext = swufile:match("[^.]+$")
+                      if ext == "swu" or ext == "upd" then
+                        if ext == "upd" then
+                          for line in io.lines(MEDIA .. path .. "/" .. swufile) do
+                            -- take first word
+                            for w in string.gmatch(line, "%g+") do
+                              swulist[count] = MEDIA .. path .. "/" .. w
+                              break
+                            end
+                            count = count + 1
                           end
-                          count = count + 1
+                        else
+                          swulist[1] = MEDIA .. path .. "/" .. swufile
                         end
-                      else
-                        swulist[1] = MEDIA .. path .. "/" .. swufile
-                      end
-                      app:addCoroutine(function()
-                          app:sendswu(swulist)
+                        app:addCoroutine(function()
+                            app:sendswu(swulist)
                           end)
-                    else
-                      app:addCoroutine(function()
-                        result = app:easyRequest(false, L.WRONG_FILE_SELECTED, L.EXIT)
-                      end)
+                      else
+                        app:addCoroutine(function()
+                            result = app:easyRequest(false, L.WRONG_FILE_SELECTED, L.EXIT)
+                          end)
+                      end
                     end
-                  end
-                end)
+                  end)
               end
             },
             Button:new
@@ -740,7 +740,7 @@ app = ui.Application:new
           HAlign = "center",
           Children =
           {
- 
+
           }
         }
       }
@@ -754,23 +754,23 @@ app = ui.Application:new
 -------------------------------------------------------------------------------
 
 local progtask = exec.run(function()
-	-- child task:
-	local exec = require "tek.lib.exec"
-	local ui = require "tek.ui"
-  local sw = require "lua_swupdate"
-  prog = sw:progress()
-  exec.sendmsg("*p", "Test")
-  
-  while true do
-    r = prog:receive()
-    local tmp = ""
-    for k,v in pairs (r) do
-      tmp = tmp .. " " .. k .. "='" .. v .. "'"
+    -- child task:
+    local exec = require "tek.lib.exec"
+    local ui = require "tek.ui"
+    local sw = require "lua_swupdate"
+    prog = sw:progress()
+    exec.sendmsg("*p", "Test")
+
+    while true do
+      r = prog:receive()
+      local tmp = ""
+      for k,v in pairs (r) do
+        tmp = tmp .. " " .. k .. "='" .. v .. "'"
+      end
+      exec.sendport("*p", "ui", tmp)
     end
-    exec.sendport("*p", "ui", tmp)
-  end
-end)
-  
+  end)
+
 -------------------------------------------------------------------------------
 --	Run application
 -------------------------------------------------------------------------------
