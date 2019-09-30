@@ -310,7 +310,7 @@ local progwin = ui.Window:new
           Text = L.BACK,
           Disabled = true,
           onClick = function(self)
-            app:switchwindow("network-window", "MainWindow")
+            app:switchwindow("progress-window", "MainWindow")
           end
         }
       }
