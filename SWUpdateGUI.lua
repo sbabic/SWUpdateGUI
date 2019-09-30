@@ -587,6 +587,7 @@ app = ui.Application:new
       g:setValue("Disabled", false)
     elseif status == STATUS_START then
       g:setValue("Text", L.STARTING_UPDATE)
+      g:setValue("Style", "color: #000000;")
     else
 
     end
