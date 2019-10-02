@@ -310,7 +310,7 @@ local progwin = ui.Window:new
           Text = L.BACK,
           Disabled = true,
           onClick = function(self)
-            app:switchwindow("progress-window", "MainWindow")
+            app:switchwindow("MainWindow")
           end
         }
       }
@@ -376,7 +376,7 @@ local netwin = NetWindow:new
   SizeButton = true,
   hide = function(self)
     ui.Window.hide(self)
-    app:switchwindow("network-window", "MainWindow")
+    app:switchwindow("MainWindow")
   end,
   Children = 
   {
@@ -479,7 +479,7 @@ local netwin = NetWindow:new
           Id = "cancel-button", 
           Text = L.CANCEL,
           onClick = function(self)
-            app:switchwindow("network-window", "MainWindow")
+            app:switchwindow("MainWindow")
           end
         }
       }
@@ -527,22 +527,24 @@ app = ui.Application:new
     end
     self:updateProgress(t)    
   end,
-  switchwindow = function(self, currentwin, newwin)
-    w = self:getById(currentwin)
-    if (not w) then
-      print("Window ", currentwin, " Not found !!")
-      return
+  switchwindow = function(self, newwin)
+    local windows = {"MainWindow", "progress-window", "network-window"}
+    for i=1, #windows do
+      win = windows[i]
+      w = self:getById(win)
+      if (not w) then
+        print("Window ", win, " Not found !!")
+        return
+      end
+      if win ~= newwin then
+        w:setValue("Status", "hide")
+      end
     end
-    w:setValue("Status", "hide")
     w = self:getById(newwin)
-    if (not w) then
-      print("Window ", newwin, " Not found !!")
-      return
-    end
-    w:setValue("Status", "show")
+    w:setValue("Status", "show")    
   end,
   switchtoprog = function(self)
-    self:switchwindow("MainWindow", "progress-window")
+    self:switchwindow("progress-window")
   end,
   sendswu = function(self, list)
     local cmd = "swupdate-client "
@@ -706,7 +708,7 @@ app = ui.Application:new
               Width = "fill",
               Height = "auto",
               onClick = function(self)
-                app:switchwindow("MainWindow", "network-window")
+                app:switchwindow("network-window")
                 local g = app:getById("network-list")
                 if g:getN(g) > 0 then
                   g:setValue("SelectedLine", g:getItem(1), true)
