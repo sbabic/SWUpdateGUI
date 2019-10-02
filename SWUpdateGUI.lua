@@ -238,7 +238,7 @@ local progwin = ui.Window:new
   Orientation = "vertical",
   Status = "hide",  
   HideOnEscape = true,
-  SizeButton = true,
+  SizeButton = false,
   show = function(self)
     ui.Window.show(self)
     self.Window:addInputHandler(ui.MSG_KEYDOWN, self, self.keypressed)
