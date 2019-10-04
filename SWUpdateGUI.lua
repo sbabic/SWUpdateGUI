@@ -667,7 +667,6 @@ app = ui.Application:new
                       Width = w - 40,
                       Height = h - 40,
                       BasePath = MEDIA,
-                      Path = "*.swu",
                       SelectMode = "single",
                       DisplayMode = "all"
                     }
