@@ -239,6 +239,7 @@ local progwin = ui.Window:new
   Status = "hide",  
   HideOnEscape = true,
   SizeButton = false,
+  FullScreen = true,
   show = function(self)
     ui.Window.show(self)
     self.Window:addInputHandler(ui.MSG_KEYDOWN, self, self.keypressed)
@@ -374,6 +375,7 @@ local netwin = NetWindow:new
   Status = "hide",  
   HideOnEscape = true,
   SizeButton = true,
+  FullScreen = true,
   hide = function(self)
     ui.Window.hide(self)
     app:switchwindow("MainWindow")
