@@ -729,6 +729,9 @@ app = ui.Application:new
               Height = "auto",
               onClick = function(self)
                 if not NOREBOOT then
+                  app:addCoroutine(function()
+                    result = app:easyRequest(false, L.REBOOTING)
+                  end)
                   os.execute ("/sbin/reboot")
                 else
                   print("Just for test, reboot simulated")
