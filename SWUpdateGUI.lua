@@ -66,6 +66,7 @@ VENDOR = "SWUpdate"
 LOGO = "images/logo.png"
 LANG = "en"
 MEDIA = "/media"
+MEDIAPATH = "/media"
 
 -- TODO: is it necessary or better use just config.lua ?
 local ARGTEMPLATE = "-r=rotate/N,--help=HELP/S,-l=LOCALE/S"
@@ -225,6 +226,41 @@ local function loadnetinterfaces()
   end
 
   updnetinterfaces()
+end
+
+local function searchupd(path)
+  local file
+  local found
+  local count = 0
+  
+  for iter in lfs.dir(path) do
+    local file = tostring(iter)
+    local ext = file:match("[^.]+$")
+    
+    print ("Extension :", ext)
+    if ext == "upd" then
+      found = file
+      count = count + 1
+    end
+  end
+  if count == 1 then
+    return found
+  end 
+  return nil
+end
+
+local function updtoswulist(path, updfile)
+  local cnt = 1
+  list = {}
+  for line in io.lines(path .. "/" .. updfile) do
+      -- take first word
+    for w in string.gmatch(line, "%g+") do
+       list[cnt] = path .. "/" .. w
+       break
+    end
+    cnt = cnt + 1
+  end
+  return cnt, list
 end
 
 -------------------------------------------------------------------------------
@@ -658,9 +694,19 @@ app = ui.Application:new
               InitialFocus = true,
 
               onClick = function(self)
+                local count = 1
                 local app = self.Application
                 local w, h = app:getById("MainWindow").Drawable:getAttrs("WH")
-                app:addCoroutine(function()
+                local singleupd = searchupd(MEDIAPATH)
+                swulist = {}
+                if singleupd then
+                  print ("Found ", singleupd)
+                  count, swulist = updtoswulist(MEDIAPATH, singleupd)
+                  app:addCoroutine(function()
+                            app:sendswu(swulist)
+                  end)
+                else
+                  app:addCoroutine(function()
                     local status, path, files = app:requestFile
                     {
                       Center = true,
@@ -673,19 +719,10 @@ app = ui.Application:new
                     print (status, path, files)
                     if (status == "selected" and files[1]) then
                       local swufile = files[1]
-                      swulist = {}
-                      local count = 1
                       local ext = swufile:match("[^.]+$")
                       if ext == "swu" or ext == "upd" then
                         if ext == "upd" then
-                          for line in io.lines(MEDIA .. path .. "/" .. swufile) do
-                            -- take first word
-                            for w in string.gmatch(line, "%g+") do
-                              swulist[count] = MEDIA .. path .. "/" .. w
-                              break
-                            end
-                            count = count + 1
-                          end
+			  count, swulist = updtoswulist(MEDIA .. path, swufile)
                         else
                           swulist[1] = MEDIA .. path .. "/" .. swufile
                         end
@@ -699,6 +736,7 @@ app = ui.Application:new
                       end
                     end
                   end)
+                end
               end
             },
             Button:new
