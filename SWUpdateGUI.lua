@@ -235,7 +235,9 @@ local function searchupd(path)
   local file
   local found
   local count = 0
-  
+  if not lfs.attributes(path) then
+    return nil
+  end
   for iter in lfs.dir(path) do
     local file = tostring(iter)
     local ext = file:match("[^.]+$")
