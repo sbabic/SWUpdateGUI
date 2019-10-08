@@ -68,6 +68,9 @@ LANG = "en"
 MEDIA = "/media"
 MEDIAPATH = "/media"
 
+numswusinupd = 1
+automaticreboot = false
+
 -- TODO: is it necessary or better use just config.lua ?
 local ARGTEMPLATE = "-r=rotate/N,--help=HELP/S,-l=LOCALE/S"
 local args = rdargs(ARGTEMPLATE, arg)
@@ -260,8 +263,9 @@ local function updtoswulist(path, updfile)
     end
     cnt = cnt + 1
   end
-  return cnt, list
+  return list
 end
+
 
 -------------------------------------------------------------------------------
 --	Progress Window
@@ -591,10 +595,20 @@ app = ui.Application:new
     end
     if string.len(cmd) > 0 then
       cmd = cmd .. " &"
+      print ("SWUSEND", cmd)
       os.execute(cmd)
     end
   end,
-
+  reboot_device = function (self)
+    if not NOREBOOT then
+      self:addCoroutine(function()
+        result = self:easyRequest(false, L.REBOOTING)
+        end)
+      os.execute ("/sbin/reboot")
+    else
+      print("Just for test, reboot simulated")
+    end
+  end,
   updateProgress = function(self, prog)
     if not prog then return end
     for k,v in pairs(prog) do
@@ -620,11 +634,20 @@ app = ui.Application:new
       g:setValue("Style", "color: #ff0000;")
       g = self:getById("progress-cancel-button")
       g:setValue("Disabled", false)
+      numswusinupd = 1
+      automaticreboot = false
     elseif status == STATUS_SUCCESS then
       g:setValue("Text", L.SUCCESS)
       g:setValue("Style", "color: #00ff00;")
       g = self:getById("progress-cancel-button")
-      g:setValue("Disabled", false)
+      numswusinupd = numswusinupd - 1
+      print("numswusinupd :", numswusinupd)
+      if numswusinupd == 0 then
+        g:setValue("Disabled", false)
+        if automaticreboot then
+          self:reboot_device(self)
+        end
+      end
     elseif status == STATUS_START then
       g:setValue("Text", L.STARTING_UPDATE)
       g:setValue("Style", "color: #000000;")
@@ -632,8 +655,7 @@ app = ui.Application:new
 
     end
   end,
-
-
+  
   Children =
   {
 
@@ -701,7 +723,9 @@ app = ui.Application:new
                 swulist = {}
                 if singleupd then
                   print ("Found ", singleupd)
-                  count, swulist = updtoswulist(MEDIAPATH, singleupd)
+                  swulist = updtoswulist(MEDIAPATH, singleupd)
+                  numswusinupd = #swulist
+                  automaticreboot = true
                   app:addCoroutine(function()
                             app:sendswu(swulist)
                   end)
@@ -722,7 +746,7 @@ app = ui.Application:new
                       local ext = swufile:match("[^.]+$")
                       if ext == "swu" or ext == "upd" then
                         if ext == "upd" then
-			  count, swulist = updtoswulist(MEDIA .. path, swufile)
+                          swulist = updtoswulist(MEDIA .. path, swufile)
                         else
                           swulist[1] = MEDIA .. path .. "/" .. swufile
                         end
@@ -765,14 +789,7 @@ app = ui.Application:new
               Width = "fill",
               Height = "auto",
               onClick = function(self)
-                if not NOREBOOT then
-                  app:addCoroutine(function()
-                    result = app:easyRequest(false, L.REBOOTING)
-                  end)
-                  os.execute ("/sbin/reboot")
-                else
-                  print("Just for test, reboot simulated")
-                end
+                app:reboot_device(app)
               end            
             }
           }
