@@ -251,7 +251,6 @@ local function searchupd(path)
   for iter in lfs.dir(path) do
     local file = tostring(iter)
     local ext = GetFileExtension(file)
-    db.trace("Extension :" .. ext)
     if ext == "upd" then
       found = file
       count = count + 1
@@ -687,6 +686,7 @@ local filebox = FileboxWindow:new
             print(file, basepath, ext)
             if ext == "upd" then
               swulist = updtoswulist(basepath, GetFileName(file))
+              numswusinupd = #swulist
             else
               swulist[1] = file
             end
