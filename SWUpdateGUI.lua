@@ -71,6 +71,8 @@ MEDIAPATH = "/media"
 numswusinupd = 1
 automaticreboot = false
 
+db.level = db.INFO
+
 -- TODO: is it necessary or better use just config.lua ?
 local ARGTEMPLATE = "-r=rotate/N,--help=HELP/S,-l=LOCALE/S"
 local args = rdargs(ARGTEMPLATE, arg)
@@ -113,6 +115,14 @@ function pairsByKeys (t, f)
     else return a[i], t[a[i]] end
   end
   return iter
+end
+
+function GetFileName(url)
+  return url:match("^.+/(.+)$")
+end
+
+function GetFileExtension(url)
+  return url:match("[^.]+$" )
 end
 
 -------------------------------------------------------------------------------
@@ -240,9 +250,8 @@ local function searchupd(path)
   end
   for iter in lfs.dir(path) do
     local file = tostring(iter)
-    local ext = file:match("[^.]+$")
-    
-    print ("Extension :", ext)
+    local ext = GetFileExtension(file)
+    db.trace("Extension :" .. ext)
     if ext == "upd" then
       found = file
       count = count + 1
@@ -253,6 +262,54 @@ local function searchupd(path)
   end 
   return nil
 end
+
+function isDir(name)
+    if type(name)~="string" then return false end
+    local cd = lfs.currentdir()
+    local is = lfs.chdir(name) and true or false
+    lfs.chdir(cd)
+    return is
+end
+
+local function rescan(path, t)
+  local file
+  local found
+  local count = 0
+  if not t then
+    t = {}
+  end
+  db.trace("SCAN PATH :" ..  path)
+  if not lfs.attributes(path) or not lfs.attributes(path).mode == "directory" then
+    return t
+  end
+  
+  if not isDir(path) then
+    return t
+  end
+  
+  for iter in lfs.dir(path) do
+    local file = tostring(iter)
+    if iter ~= ".." and iter ~= "." then
+      file = path .. "/" .. file
+      if lfs.attributes(file) then
+        if lfs.attributes(file).mode == "directory" then
+          t = rescan(file, t)
+          ::continue::
+        end
+      end
+      local ext = GetFileExtension(file)
+      if ext then
+        ext = string.lower(ext)
+        if ext == "upd" or ext == "swu" then
+          db.info("SCAN : ADDED " .. file)
+          table.insert(t,file)
+        end
+      end
+    end
+  end
+  return t
+end
+
 
 local function updtoswulist(path, updfile)
   local cnt = 1
@@ -532,6 +589,135 @@ local netwin = NetWindow:new
 }
 
 -------------------------------------------------------------------------------
+--	Filebox Window
+-------------------------------------------------------------------------------
+
+local FileboxWindow = ui.Window:newClass { _NAME = "_filebox_window" }
+
+function FileboxWindow:scanmedia()
+  files = rescan(MEDIA, nil)
+  if files then
+    print ("Elements found", #files)
+  end
+  self.filelist = files
+  local list = self:getById("files-list")
+  list:clear()
+  for i=1,#files do
+      local entry = {}
+      table.insert(entry, GetFileName(files[i]))
+      local size = lfs.attributes(files[i]).size
+      table.insert(entry, size)
+      local item = {}
+      table.insert(item, entry)
+      list:addItem(item)
+  end
+end
+
+local filebox = FileboxWindow:new
+{
+  Id = "filebox-window",
+  Title = APP_ID .. " " .. VERSION,
+  Orientation = "vertical",
+  Status = "hide",  
+  HideOnEscape = true,
+  SizeButton = false,
+  --FullScreen = true,
+  hide = function(self)
+    ui.Window.hide(self)
+    app:switchwindow("MainWindow")
+  end,
+  show = function(self)
+    ui.Window.show(self)
+    self:scanmedia()
+  end,
+  Children = 
+  {
+    RescueGUIHeader:new 
+    { 
+      Description = APP_ID .. " " .. VERSION,
+      Image = LogoImage,
+    },
+    ui.ListView:new
+    {
+      VSliderMode = "auto",
+      HSliderMode = "auto",
+      Headers = {L.FILENAME, L.SIZE},
+      Child = ui.Lister:new
+      {
+        Id = "files-list",
+        SelectMode = "single",
+        SelectedLine = 1,
+        InitialFocus = true,
+        ListObject = List:new
+        {
+          Id = "files-objects",
+          Items = {}
+        },
+        onSelectLine = function(self)
+          ui.Lister.onSelectLine(self)
+          local line = self:getItem(self.SelectedLine)
+          if line then
+          end
+        end,
+      }
+    },
+    ui.Group:new
+    {
+      Orientation = "horizontal",
+      SameSize = true,
+      Children =
+      {
+        ui.Button:new 
+        { 
+          Id = "install-button", 
+          Text = L.START,
+          onClick = function(self)
+            ui.Button.onClick(self)
+            local list = self:getById("files-list")
+            local index = list.SelectedLine
+            local line = list:getItem(index)
+            local swulist = {}
+            if not line then
+              print("No file selected, no install")
+              return
+            end
+            local file = self.Window.filelist[index]
+            local ext = GetFileExtension(file)
+            local basepath = string.gsub(file, "(.*/)(.*)", "%1")
+            print(file, basepath, ext)
+            if ext == "upd" then
+              swulist = updtoswulist(basepath, GetFileName(file))
+            else
+              swulist[1] = file
+            end
+            app:addCoroutine(function()
+                app:sendswu(swulist)
+            end)        
+          end
+        },
+        ui.Button:new 
+        { 
+          Id = "rescan-button", 
+          Text = L.RESCAN,
+          onClick = function(self)
+            self.Window:scanmedia()
+          end
+        },
+
+        ui.Button:new 
+        { 
+          Id = "abort-button", 
+          Text = L.CANCEL,
+          onClick = function(self)
+            app:switchwindow("MainWindow")
+          end
+        }
+      }
+    }
+  }
+}
+
+-------------------------------------------------------------------------------
 --	Application:
 -------------------------------------------------------------------------------
 
@@ -566,18 +752,18 @@ app = ui.Application:new
       k,v = string.match(field, "(%a+)=\'(.*)\'")
       if k then
         t[k] = v
-        print (k, "=", v)
+        db.trace (k .. " = " .. v)
       end
     end
     self:updateProgress(t)    
   end,
   switchwindow = function(self, newwin)
-    local windows = {"MainWindow", "progress-window", "network-window"}
+    local windows = {"MainWindow", "progress-window", "network-window", "filebox-window"}
     for i=1, #windows do
       win = windows[i]
       w = self:getById(win)
       if (not w) then
-        print("Window ", win, " Not found !!")
+        db.error("Window " .. win, " .. Not found !!")
         return
       end
       if win ~= newwin then
@@ -660,7 +846,6 @@ app = ui.Application:new
   
   Children =
   {
-
     ui.Window:new
     {
       Orientation = "vertical",
@@ -729,40 +914,11 @@ app = ui.Application:new
                   numswusinupd = #swulist
                   automaticreboot = true
                   app:addCoroutine(function()
-                            app:sendswu(swulist)
+                    app:sendswu(swulist)
                   end)
                 else
-                  app:addCoroutine(function()
-                    local status, path, files = app:requestFile
-                    {
-                      Center = true,
-                      Width = w - 40,
-                      Height = h - 40,
-                      BasePath = MEDIA,
-                      SelectMode = "single",
-                      DisplayMode = "all"
-                    }
-                    print (status, path, files)
-                    if (status == "selected" and files[1]) then
-                      local swufile = files[1]
-                      local ext = swufile:match("[^.]+$")
-                      if ext == "swu" or ext == "upd" then
-                        if ext == "upd" then
-                          swulist = updtoswulist(MEDIA .. path, swufile)
-                        else
-                          swulist[1] = MEDIA .. path .. "/" .. swufile
-                        end
-                        app:addCoroutine(function()
-                            app:sendswu(swulist)
-                          end)
-                      else
-                        app:addCoroutine(function()
-                            result = app:easyRequest(false, L.WRONG_FILE_SELECTED, L.EXIT)
-                          end)
-                      end
-                    end
-                  end)
-                end
+                  app:switchwindow("filebox-window")
+                end  
               end
             },
             Button:new
@@ -812,7 +968,6 @@ app = ui.Application:new
   }
 }
 
-
 -------------------------------------------------------------------------------
 --	Progress task connecting to swupdate
 -------------------------------------------------------------------------------
@@ -844,6 +999,8 @@ loadnetinterfaces(app)
 app:addMember(netwin)
 ui.Application.connect(netwin)
 netwin:loadinterfaces()
+app:addMember(filebox)
+ui.Application.connect(filebox)
 
 progwin:setValue("Status", "hide")
 netwin:setValue("Status", "hide")
