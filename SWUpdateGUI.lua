@@ -651,6 +651,7 @@ local filebox = FileboxWindow:new
       VSliderMode = "on",
       HSliderMode = "off",
       Headers = {L.FILENAME, L.SIZE},
+      VIncrement = 40,
       Child = ui.Lister:new
       {
         Id = "files-list",
