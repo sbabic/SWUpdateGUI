@@ -663,13 +663,7 @@ local filebox = FileboxWindow:new
           Id = "files-objects",
           Items = {}
         },
-        onSelectLine = function(self)
-          ui.Lister.onSelectLine(self)
-          local line = self:getItem(self.SelectedLine)
-          if line then
-          end
-        end,
-      }
+      },
     },
     ui.Group:new
     {
