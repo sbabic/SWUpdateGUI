@@ -308,7 +308,7 @@ local function rescan(path, t, level)
       if ext then
         ext = string.lower(ext)
         if ext == "upd" or ext == "swu" then
-          db.info("SCAN : ADDED " .. file)
+          db.trace("SCAN : ADDED " .. file)
           table.insert(t,file)
         end
       end
@@ -538,7 +538,7 @@ local netwin = NetWindow:new
             local list = self:getById("network-list")
             local line = list:getItem(list.SelectedLine)
             if not line then
-              print("No interface selected, no change")
+              db.info("No interface selected, no change")
               return
             end
             local intf
@@ -687,7 +687,7 @@ local filebox = FileboxWindow:new
             local line = list:getItem(index)
             local swulist = {}
             if not line then
-              print("No file selected, no install")
+              db.info("No file selected, no install")
               return
             end
             local file = self.Window.filelist[index]
@@ -800,7 +800,7 @@ app = ui.Application:new
     end
     if string.len(cmd) > 0 then
       cmd = cmd .. " &"
-      print ("SWUSEND", cmd)
+      db.trace ("SWUSEND " .. cmd)
       os.execute(cmd)
     end
   end,
@@ -811,13 +811,13 @@ app = ui.Application:new
         end)
       os.execute ("/sbin/reboot")
     else
-      print("Just for test, reboot simulated")
+      db.info("Just for test, reboot simulated")
     end
   end,
   updateProgress = function(self, prog)
     if not prog then return end
     for k,v in pairs(prog) do
-      print(k,v)
+      db.trace(k,v)
     end
     g = self:getById("slider-steps")
     g:setValue("Max", tonumber(prog["nsteps"]))
@@ -846,7 +846,6 @@ app = ui.Application:new
       g:setValue("Style", "color: #00ff00;")
       g = self:getById("progress-cancel-button")
       numswusinupd = numswusinupd - 1
-      print("numswusinupd :", numswusinupd)
       if numswusinupd == 0 then
         g:setValue("Disabled", false)
         if automaticreboot then
@@ -926,7 +925,7 @@ app = ui.Application:new
                 local singleupd = searchupd(MEDIAPATH)
                 swulist = {}
                 if singleupd then
-                  print ("Found ", singleupd)
+                  db.info ("Found Update File : " .. singleupd)
                   swulist = updtoswulist(MEDIAPATH, singleupd)
                   numswusinupd = #swulist
                   automaticreboot = true
