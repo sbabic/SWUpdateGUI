@@ -596,7 +596,7 @@ local FileboxWindow = ui.Window:newClass { _NAME = "_filebox_window" }
 function FileboxWindow:scanmedia()
   files = rescan(MEDIA, nil)
   if files then
-    print ("Elements found", #files)
+    db.trace ("Elements found: ", #files)
   end
   self.filelist = files
   local list = self:getById("files-list")
@@ -628,6 +628,8 @@ local filebox = FileboxWindow:new
   show = function(self)
     ui.Window.show(self)
     self:scanmedia()
+    local list = self:getById("files-list")
+    list:repaint()
   end,
   Children = 
   {
@@ -638,8 +640,8 @@ local filebox = FileboxWindow:new
     },
     ui.ListView:new
     {
-      VSliderMode = "auto",
-      HSliderMode = "auto",
+      VSliderMode = "on",
+      HSliderMode = "off",
       Headers = {L.FILENAME, L.SIZE},
       Child = ui.Lister:new
       {
@@ -683,7 +685,6 @@ local filebox = FileboxWindow:new
             local file = self.Window.filelist[index]
             local ext = GetFileExtension(file)
             local basepath = string.gsub(file, "(.*/)(.*)", "%1")
-            print(file, basepath, ext)
             if ext == "upd" then
               swulist = updtoswulist(basepath, GetFileName(file))
               numswusinupd = #swulist
@@ -711,6 +712,14 @@ local filebox = FileboxWindow:new
           onClick = function(self)
             app:switchwindow("MainWindow")
           end
+        },
+        ui.Text:new
+        {
+          Id = "dummy-filebox",
+          Disabled = "true",
+          Style = [[
+            border-width : 0;
+          ]]
         }
       }
     }
