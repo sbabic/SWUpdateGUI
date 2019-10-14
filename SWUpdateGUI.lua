@@ -693,6 +693,7 @@ local filebox = FileboxWindow:new
               numswusinupd = #swulist
             else
               swulist[1] = file
+              numswusinupd = 1
             end
             app:addCoroutine(function()
                 app:sendswu(swulist)
@@ -1016,6 +1017,8 @@ ui.Application.connect(filebox)
 progwin:setValue("Status", "hide")
 netwin:setValue("Status", "hide")
 app:addMember(progwin)
+
+app:switchwindow("filebox-window")
 
 app:run()
 
