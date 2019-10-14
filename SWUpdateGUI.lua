@@ -917,20 +917,7 @@ app = ui.Application:new
               onClick = function(self)
                 local count = 1
                 local app = self.Application
-                local w, h = app:getById("MainWindow").Drawable:getAttrs("WH")
-                local singleupd = searchupd(MEDIAPATH)
-                swulist = {}
-                if singleupd then
-                  db.info ("Found Update File : " .. singleupd)
-                  swulist = updtoswulist(MEDIAPATH, singleupd)
-                  numswusinupd = #swulist
-                  automaticreboot = true
-                  app:addCoroutine(function()
-                    app:sendswu(swulist)
-                  end)
-                else
-                  app:switchwindow("filebox-window")
-                end  
+                app:switchwindow("filebox-window")
               end
             },
             Button:new
@@ -1018,7 +1005,17 @@ progwin:setValue("Status", "hide")
 netwin:setValue("Status", "hide")
 app:addMember(progwin)
 
-app:switchwindow("filebox-window")
+local singleupd = searchupd(MEDIAPATH)
+swulist = {}
+if singleupd then
+  db.info ("Found Update File : " .. singleupd)
+  swulist = updtoswulist(MEDIAPATH, singleupd)
+  numswusinupd = #swulist
+  automaticreboot = true
+  app:addCoroutine(function()
+  app:sendswu(swulist)
+  end)
+end
 
 app:run()
 
