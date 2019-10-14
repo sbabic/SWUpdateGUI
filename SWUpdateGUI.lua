@@ -67,6 +67,7 @@ LOGO = "images/logo.png"
 LANG = "en"
 MEDIA = "/media"
 MEDIAPATH = "/media"
+SCANLEVEL = -1 -- scan recursive all directories
 
 numswusinupd = 1
 automaticreboot = false
@@ -270,10 +271,11 @@ function isDir(name)
     return is
 end
 
-local function rescan(path, t)
+local function rescan(path, t, level)
   local file
   local found
   local count = 0
+  local fullrecursive = false
   if not t then
     t = {}
   end
@@ -281,7 +283,9 @@ local function rescan(path, t)
   if not lfs.attributes(path) or not lfs.attributes(path).mode == "directory" then
     return t
   end
-  
+  if level == -1 then
+    fullrecursive = true
+  end
   if not isDir(path) then
     return t
   end
@@ -292,8 +296,12 @@ local function rescan(path, t)
       file = path .. "/" .. file
       if lfs.attributes(file) then
         if lfs.attributes(file).mode == "directory" then
-          t = rescan(file, t)
-          ::continue::
+          if fullrecursive then
+             t = rescan(file, t, - 1)
+          elseif level > 0 then
+             t = rescan(file, t, level - 1)
+          end
+          ::continue::        
         end
       end
       local ext = GetFileExtension(file)
@@ -594,7 +602,7 @@ local netwin = NetWindow:new
 local FileboxWindow = ui.Window:newClass { _NAME = "_filebox_window" }
 
 function FileboxWindow:scanmedia()
-  files = rescan(MEDIA, nil)
+  files = rescan(MEDIA, nil, SCANLEVEL)
   if files then
     db.trace ("Elements found: ", #files)
   end
