@@ -10,7 +10,7 @@
 function ifup(setup)
   for _,intf in pairs(setup) do
     local cmd
-    if  intf["name"] == "DefaultGateway" then
+    if  intf["name"] == "Gateway" then
       cmd = "route del default;route add default gw " .. intf["addr"]
     else
       if intf["dhcp"] then
