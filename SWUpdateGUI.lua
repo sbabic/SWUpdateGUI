@@ -608,7 +608,7 @@ function FileboxWindow:scanmedia()
   end
   self.filelist = files
   local list = self:getById("files-list")
-  list:clear()
+  list:setList(List:new())
   for i=1,#files do
       local entry = {}
       table.insert(entry, GetFileName(files[i]))
