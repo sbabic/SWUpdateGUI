@@ -977,6 +977,8 @@ local progtask = exec.run(function()
     local ui = require "tek.ui"
     local sw = require "lua_swupdate"
     prog = sw:progress()
+    fd, err = prog:connect()
+    if not fd then print(err) end
     exec.sendmsg("*p", "Test")
 
     while true do
