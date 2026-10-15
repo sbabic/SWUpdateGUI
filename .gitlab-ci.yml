@@ -7,3 +7,32 @@ Format-check:
     stage: clang-format-check
     rules:
       - when: never
+
+Cargo-build:
+    # ".pre" exists in every pipeline, whatever stages the included pipeline defines
+    stage: .pre
+    image: rust:1.90-trixie
+    variables:
+        DEBIAN_FRONTEND: noninteractive
+        CARGO_HOME: "$CI_PROJECT_DIR/.cargo-home"
+    cache:
+        key:
+            files:
+                - Cargo.lock
+        paths:
+            - .cargo-home/registry/
+            - target/
+    before_script:
+        - apt-get update -qq
+        - apt-get install -y -qq --no-install-recommends cmake libclang-dev libswupdate-dev
+        - rustup component add rustfmt clippy
+        - ci/build-lvgl.sh
+    script:
+        - cargo fmt --check
+        - cargo clippy --all-targets --locked -- -D warnings
+        - cargo test --locked
+        - cargo build --release --locked
+    artifacts:
+        paths:
+            - target/release/recovery_gui
+        expire_in: 1 week

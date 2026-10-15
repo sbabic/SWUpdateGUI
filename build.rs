@@ -22,7 +22,9 @@ use std::path::{Path, PathBuf};
 
 fn env_path(name: &str) -> Option<PathBuf> {
     println!("cargo:rerun-if-env-changed={name}");
-    env::var_os(name).filter(|v| !v.is_empty()).map(PathBuf::from)
+    env::var_os(name)
+        .filter(|v| !v.is_empty())
+        .map(PathBuf::from)
 }
 
 fn sysroot() -> Option<PathBuf> {
@@ -37,7 +39,10 @@ fn find_dir(candidates: &[PathBuf], probe: &str) -> Option<PathBuf> {
 fn default_include_dirs(sysroot: &Option<PathBuf>) -> Vec<PathBuf> {
     match sysroot {
         Some(root) => vec![root.join("usr/include"), root.join("usr/local/include")],
-        None => vec![PathBuf::from("/usr/include"), PathBuf::from("/usr/local/include")],
+        None => vec![
+            PathBuf::from("/usr/include"),
+            PathBuf::from("/usr/local/include"),
+        ],
     }
 }
 
@@ -70,10 +75,20 @@ fn generate_lvgl(out: &Path, sysroot: &Option<PathBuf>) {
     }
     println!("cargo:rustc-link-lib=m");
 
+    let mut clang_args = vec![
+        format!("-I{}", inc.display()),
+        format!("-I{}", inc.join("lvgl").display()),
+    ];
+    // LVGL >= 9.5 installs lv_conf.h into lvgl/config and expects LV_CONF_INCLUDE_SIMPLE
+    let conf_dir = inc.join("lvgl/config");
+    if conf_dir.join("lv_conf.h").exists() {
+        clang_args.push(format!("-I{}", conf_dir.display()));
+        clang_args.push("-DLV_CONF_INCLUDE_SIMPLE".into());
+    }
+
     let bindings = bindgen::Builder::default()
         .header("wrapper/lvgl.h")
-        .clang_arg(format!("-I{}", inc.display()))
-        .clang_arg(format!("-I{}", inc.join("lvgl").display()))
+        .clang_args(clang_args)
         .clang_args(sysroot_clang_args(sysroot))
         .allowlist_function("lv_.*")
         .allowlist_type("lv_.*")
@@ -87,7 +102,9 @@ fn generate_lvgl(out: &Path, sysroot: &Option<PathBuf>) {
         .expect("unable to generate LVGL bindings");
 
     let path = out.join("lvgl_bindings.rs");
-    bindings.write_to_file(&path).expect("unable to write LVGL bindings");
+    bindings
+        .write_to_file(&path)
+        .expect("unable to write LVGL bindings");
 
     // The grid navigation helper is optional in lv_conf.h. Without it the
     // GUI still works with touch, only keypad navigation is reduced.
@@ -95,7 +112,9 @@ fn generate_lvgl(out: &Path, sysroot: &Option<PathBuf>) {
     if text.contains("pub fn lv_gridnav_add(") {
         println!("cargo:rustc-cfg=lvgl_gridnav");
     } else {
-        println!("cargo:warning=LVGL was built without LV_USE_GRIDNAV; keypad navigation is limited");
+        println!(
+            "cargo:warning=LVGL was built without LV_USE_GRIDNAV; keypad navigation is limited"
+        );
     }
 }
 
