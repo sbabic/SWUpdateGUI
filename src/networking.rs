@@ -46,11 +46,19 @@ fn is_dhcp(address: &str) -> bool {
     if address.is_empty() {
         return false;
     }
-    run_script(SCRIPT_GET_DHCP_STATUS, &[format!("--address={address}")], &[0, 1]) == 0
+    run_script(
+        SCRIPT_GET_DHCP_STATUS,
+        &[format!("--address={address}")],
+        &[0, 1],
+    ) == 0
 }
 
 fn is_bridge_port(interface: &str) -> bool {
-    run_script(SCRIPT_CHECK_BRIDGE_INTERFACE, &[format!("--interface={interface}")], &[0, 1]) == 1
+    run_script(
+        SCRIPT_CHECK_BRIDGE_INTERFACE,
+        &[format!("--interface={interface}")],
+        &[0, 1],
+    ) == 1
 }
 
 /// Convert a hex value from /proc/net/route to a dotted IP address,
@@ -117,11 +125,7 @@ pub fn netmask_prefix_length(netmask: Ipv4Addr) -> Option<u32> {
 
 /// Convert dotted IP-address & netmask to cidr format, e.g. "192.168.1.14/24"
 pub fn to_cidr(address: &str, netmask: &str) -> Option<String> {
-    let prefix = netmask
-        .trim()
-        .parse()
-        .ok()
-        .and_then(netmask_prefix_length);
+    let prefix = netmask.trim().parse().ok().and_then(netmask_prefix_length);
 
     match prefix {
         Some(prefix) => Some(format!("{address}/{prefix}")),
@@ -144,7 +148,11 @@ pub fn set_static_configuration(interface: &str, address: &str, netmask: &str) -
 
 /// Reconfigure a network interface as a dhcp client.
 pub fn reconfigure_as_dhcp_client(interface: &str) -> bool {
-    run_script(SCRIPT_SET_INTERFACE_DHCP, &[format!("--interface={interface}")], &[0, 1]) == 0
+    run_script(
+        SCRIPT_SET_INTERFACE_DHCP,
+        &[format!("--interface={interface}")],
+        &[0, 1],
+    ) == 0
 }
 
 pub fn delete_gateway() -> bool {
@@ -235,7 +243,10 @@ mod tests {
 
     #[test]
     fn binary_to_ipv4_conversion() {
-        assert_eq!(hex_to_dotted_address("FE01A8C0").as_deref(), Some("192.168.1.254"));
+        assert_eq!(
+            hex_to_dotted_address("FE01A8C0").as_deref(),
+            Some("192.168.1.254")
+        );
         assert_eq!(hex_to_dotted_address("AXELOT"), None);
         assert_eq!(hex_to_dotted_address("0000001").as_deref(), Some("1.0.0.0"));
         assert_eq!(hex_to_dotted_address("+-0039403"), None);
@@ -243,16 +254,40 @@ mod tests {
 
     #[test]
     fn convert_to_cidr() {
-        assert_eq!(to_cidr("192.168.1.14", "255.255.255.0").as_deref(), Some("192.168.1.14/24"));
+        assert_eq!(
+            to_cidr("192.168.1.14", "255.255.255.0").as_deref(),
+            Some("192.168.1.14/24")
+        );
         assert_eq!(to_cidr("ABCD", "255.0.0.0").as_deref(), Some("ABCD/8"));
         assert_eq!(to_cidr("1.1.1.1", "220.128.0.0"), None);
-        assert_eq!(to_cidr("192.168.1.14", "255.254.0.0").as_deref(), Some("192.168.1.14/15"));
-        assert_eq!(to_cidr("192.168.1.14", "128.0.0.0").as_deref(), Some("192.168.1.14/1"));
-        assert_eq!(to_cidr("192.168.1.14", "255.255.224.0").as_deref(), Some("192.168.1.14/19"));
-        assert_eq!(to_cidr("192.168.1.14", "255.255.255.252").as_deref(), Some("192.168.1.14/30"));
-        assert_eq!(to_cidr("192.168.1.14", "255.255.255.255").as_deref(), Some("192.168.1.14/32"));
-        assert_eq!(to_cidr("192.168.1.14", "255.255.248.0").as_deref(), Some("192.168.1.14/21"));
-        assert_eq!(to_cidr("192.168.1.14", "0.0.0.0").as_deref(), Some("192.168.1.14/0"));
+        assert_eq!(
+            to_cidr("192.168.1.14", "255.254.0.0").as_deref(),
+            Some("192.168.1.14/15")
+        );
+        assert_eq!(
+            to_cidr("192.168.1.14", "128.0.0.0").as_deref(),
+            Some("192.168.1.14/1")
+        );
+        assert_eq!(
+            to_cidr("192.168.1.14", "255.255.224.0").as_deref(),
+            Some("192.168.1.14/19")
+        );
+        assert_eq!(
+            to_cidr("192.168.1.14", "255.255.255.252").as_deref(),
+            Some("192.168.1.14/30")
+        );
+        assert_eq!(
+            to_cidr("192.168.1.14", "255.255.255.255").as_deref(),
+            Some("192.168.1.14/32")
+        );
+        assert_eq!(
+            to_cidr("192.168.1.14", "255.255.248.0").as_deref(),
+            Some("192.168.1.14/21")
+        );
+        assert_eq!(
+            to_cidr("192.168.1.14", "0.0.0.0").as_deref(),
+            Some("192.168.1.14/0")
+        );
         assert_eq!(to_cidr("192.168.1.14", "not a netmask"), None);
     }
 
@@ -261,7 +296,10 @@ mod tests {
         let table = "Iface\tDestination\tGateway \tFlags\tRefCnt\tUse\tMetric\tMask\n\
                      eth0\t0001A8C0\t00000000\t0001\t0\t0\t0\t00FFFFFF\n\
                      eth0\t00000000\tFE01A8C0\t0003\t0\t0\t0\t00000000\n";
-        assert_eq!(parse_default_gateway(table).as_deref(), Some("192.168.1.254"));
+        assert_eq!(
+            parse_default_gateway(table).as_deref(),
+            Some("192.168.1.254")
+        );
 
         let no_default = "Iface\tDestination\tGateway\n\
                           eth0\t0001A8C0\t00000000\n";
@@ -273,7 +311,10 @@ mod tests {
 
     #[test]
     fn dhcp_text() {
-        let mut info = Ipv4Info { name: "eth0".into(), ..Default::default() };
+        let mut info = Ipv4Info {
+            name: "eth0".into(),
+            ..Default::default()
+        };
         assert_eq!(info.dhcp_text(), "no");
         info.is_dhcp = true;
         assert_eq!(info.dhcp_text(), "yes");

@@ -48,8 +48,8 @@ struct NetworkScreen {
     screen: Screen,
 
     /* panel showing list of network interfaces: a table of N+1 rows, where N is the number of
-       network interfaces and the last row is the default gateway. Each row shows the name,
-       ip address, netmask and whether it is configured as a DHCP client. */
+    network interfaces and the last row is the default gateway. Each row shows the name,
+    ip address, netmask and whether it is configured as a DHCP client. */
     list_panel: Obj,
     table: Obj,
     rows: Vec<TableRow>,
@@ -248,7 +248,11 @@ fn create_table_row(table: Obj, info: &Ipv4Info, index: usize) -> TableRow {
     checkbox.add_flag(sys::LV_OBJ_FLAG_EVENT_BUBBLE);
     checkbox.remove_flag(sys::LV_OBJ_FLAG_CLICKABLE);
 
-    for text in [info.address.as_str(), info.netmask.as_str(), info.dhcp_text()] {
+    for text in [
+        info.address.as_str(),
+        info.netmask.as_str(),
+        info.dhcp_text(),
+    ] {
         let label = create_column_label(row, text);
         label.add_flag(sys::LV_OBJ_FLAG_CLICKABLE | sys::LV_OBJ_FLAG_EVENT_BUBBLE);
     }
@@ -328,7 +332,10 @@ impl NetworkScreen {
         self.table.delete();
         self.table = create_table(self.list_panel);
 
-        let items = self.interfaces.iter().chain(std::iter::once(&self.default_gateway));
+        let items = self
+            .interfaces
+            .iter()
+            .chain(std::iter::once(&self.default_gateway));
         self.rows = items
             .enumerate()
             .map(|(index, info)| create_table_row(self.table, info, index))
@@ -389,7 +396,10 @@ impl NetworkScreen {
 
         self.configure_buttons(&[(0, c"OK", Action::Ok), (1, c"EDIT", Action::Edit)]);
 
-        lv::set_navigation(&[(self.table, GridNav::ScrollFirst), (self.actions, GridNav::None)]);
+        lv::set_navigation(&[
+            (self.table, GridNav::ScrollFirst),
+            (self.actions, GridNav::None),
+        ]);
 
         self.clear_all_checkboxes();
         self.selected = None;
@@ -407,7 +417,10 @@ impl NetworkScreen {
         let item = self.item(selected).clone();
 
         self.selected_interface_label.label_set_text(&item.name);
-        for (panel, text) in [(&self.ip_address, &item.address), (&self.netmask, &item.netmask)] {
+        for (panel, text) in [
+            (&self.ip_address, &item.address),
+            (&self.netmask, &item.netmask),
+        ] {
             panel
                 .text_area
                 .set_style_bg_color(lv::color_white(), sys::LV_PART_MAIN);

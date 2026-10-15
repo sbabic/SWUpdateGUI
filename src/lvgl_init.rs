@@ -58,7 +58,9 @@ fn initialize_display(params: &RecoveryParameters) {
     let angle = params.env.screen_orientation_angle;
     let Some(rotation) = system::rotation_from_angle(angle) else {
         log::error!("Invalid screen rotation angle: {angle}.");
-        log::error!("Please provide correct value in SCREEN_ORIENTATION_ANGLE environment variable.");
+        log::error!(
+            "Please provide correct value in SCREEN_ORIENTATION_ANGLE environment variable."
+        );
         log::error!("Valid values are: 0, 90, 180, 270.");
         std::process::exit(-1);
     };

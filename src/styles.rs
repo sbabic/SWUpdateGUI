@@ -160,7 +160,9 @@ impl Styles {
             },
             checkbox_disabled: {
                 let s = Style::new();
-                s.bg_color(lv::palette_main(grey)).bg_opa(lv::OPA_COVER).radius(2);
+                s.bg_color(lv::palette_main(grey))
+                    .bg_opa(lv::OPA_COVER)
+                    .radius(2);
                 s
             },
             checkbox_selected: {
@@ -262,9 +264,18 @@ pub fn apply_scrollbar_style(panel: Obj) {
 
 pub fn apply_checkbox_style(checkbox: Obj) {
     let s = styles();
-    checkbox.add_style(s.checkbox_default, sys::LV_PART_INDICATOR | sys::LV_STATE_DEFAULT);
-    checkbox.add_style(s.checkbox_checked, sys::LV_PART_INDICATOR | sys::LV_STATE_CHECKED);
-    checkbox.add_style(s.checkbox_disabled, sys::LV_PART_INDICATOR | sys::LV_STATE_DISABLED);
+    checkbox.add_style(
+        s.checkbox_default,
+        sys::LV_PART_INDICATOR | sys::LV_STATE_DEFAULT,
+    );
+    checkbox.add_style(
+        s.checkbox_checked,
+        sys::LV_PART_INDICATOR | sys::LV_STATE_CHECKED,
+    );
+    checkbox.add_style(
+        s.checkbox_disabled,
+        sys::LV_PART_INDICATOR | sys::LV_STATE_DISABLED,
+    );
     checkbox.add_style(s.checkbox_selected, MAIN | sys::LV_STATE_FOCUS_KEY);
 }
 
@@ -297,7 +308,12 @@ pub enum NotifyType {
 /// Apply the notification style of the given type, replacing the previous one.
 pub fn apply_notify_style(obj: Obj, kind: NotifyType) {
     let s = styles();
-    for style in [s.notify_info, s.notify_success, s.notify_warning, s.notify_error] {
+    for style in [
+        s.notify_info,
+        s.notify_success,
+        s.notify_warning,
+        s.notify_error,
+    ] {
         obj.remove_style(Some(style), MAIN);
     }
 

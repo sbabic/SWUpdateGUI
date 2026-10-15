@@ -130,7 +130,8 @@ impl MainScreen {
         lv::set_navigation(&[(self.actions, GridNav::Rollover)]);
 
         self.restart_button.remove_state(sys::LV_STATE_FOCUS_KEY);
-        self.network_setup_button.remove_state(sys::LV_STATE_FOCUS_KEY);
+        self.network_setup_button
+            .remove_state(sys::LV_STATE_FOCUS_KEY);
         self.install_button.add_state(sys::LV_STATE_FOCUS_KEY);
     }
 

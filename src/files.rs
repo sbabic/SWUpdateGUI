@@ -69,7 +69,10 @@ pub fn list_all_swu_files(source_dir: &Path) -> DirInfo {
 
     for entry in entries.flatten() {
         let Ok(name) = entry.file_name().into_string() else {
-            log::warn!("Skipping entry with non UTF-8 name: {:?}", entry.file_name());
+            log::warn!(
+                "Skipping entry with non UTF-8 name: {:?}",
+                entry.file_name()
+            );
             continue;
         };
         let Ok(file_type) = entry.file_type() else {
@@ -139,10 +142,8 @@ mod tests {
 
     impl TempDir {
         fn new(name: &str) -> Self {
-            let path = std::env::temp_dir().join(format!(
-                "recovery-gui-test-{name}-{}",
-                std::process::id()
-            ));
+            let path = std::env::temp_dir()
+                .join(format!("recovery-gui-test-{name}-{}", std::process::id()));
             let _ = fs::remove_dir_all(&path);
             fs::create_dir_all(&path).unwrap();
             TempDir(path)
@@ -179,8 +180,14 @@ mod tests {
         assert_eq!(
             info.swu_files,
             [
-                FileInfo { name: "hello.swu".into(), size: 5 },
-                FileInfo { name: "tmpabx10.swu".into(), size: 0 },
+                FileInfo {
+                    name: "hello.swu".into(),
+                    size: 5
+                },
+                FileInfo {
+                    name: "tmpabx10.swu".into(),
+                    size: 0
+                },
             ]
         );
         assert_eq!(info.entry_count(), 5);
@@ -236,8 +243,14 @@ mod tests {
         let mut info = DirInfo {
             dirs: vec!["..".into(), "a".into()],
             swu_files: vec![
-                FileInfo { name: "1.swu".into(), size: 0 },
-                FileInfo { name: "2.swu".into(), size: 0 },
+                FileInfo {
+                    name: "1.swu".into(),
+                    size: 0,
+                },
+                FileInfo {
+                    name: "2.swu".into(),
+                    size: 0,
+                },
             ],
         };
         info.truncate(3);

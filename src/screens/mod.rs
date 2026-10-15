@@ -130,7 +130,8 @@ impl Screen {
         };
 
         styles::apply_notify_style(self.notification, kind);
-        self.message_label.label_set_text(&format!("{prefix}: {text}"));
+        self.message_label
+            .label_set_text(&format!("{prefix}: {text}"));
     }
 
     pub fn clear_notification(&self) {

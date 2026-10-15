@@ -111,7 +111,13 @@ mod tests {
 
     #[test]
     fn run_script_return_value() {
-        assert_eq!(run_script("/bin/sh", &["-c".into(), "exit 1".into()], &[0, 1]), 1);
-        assert_eq!(run_script("/bin/sh", &["-c".into(), "true".into()], &[0, 1]), 0);
+        assert_eq!(
+            run_script("/bin/sh", &["-c".into(), "exit 1".into()], &[0, 1]),
+            1
+        );
+        assert_eq!(
+            run_script("/bin/sh", &["-c".into(), "true".into()], &[0, 1]),
+            0
+        );
     }
 }

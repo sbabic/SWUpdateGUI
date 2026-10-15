@@ -156,7 +156,9 @@ impl IpcConnection {
         if res > 0 {
             let text = unsafe {
                 let msg = msg.assume_init_ref();
-                CStr::from_ptr(msg.data.notify.msg.as_ptr()).to_string_lossy().into_owned()
+                CStr::from_ptr(msg.data.notify.msg.as_ptr())
+                    .to_string_lossy()
+                    .into_owned()
             };
             push_message(text);
         } else {
@@ -173,8 +175,16 @@ impl IpcConnection {
 
     fn poll(&mut self) {
         let mut fds = [
-            libc::pollfd { fd: self.progress_fd, events: libc::POLLIN, revents: 0 },
-            libc::pollfd { fd: self.notify_fd, events: libc::POLLIN, revents: 0 },
+            libc::pollfd {
+                fd: self.progress_fd,
+                events: libc::POLLIN,
+                revents: 0,
+            },
+            libc::pollfd {
+                fd: self.notify_fd,
+                events: libc::POLLIN,
+                revents: 0,
+            },
         ];
 
         let ready = unsafe { libc::poll(fds.as_mut_ptr(), fds.len() as libc::nfds_t, -1) };
@@ -286,7 +296,11 @@ pub fn start_local_update(filename: &str, dry_run: bool) {
         sys::swupdate_prepare_req(request.as_mut_ptr());
         let mut request = request.assume_init();
 
-        request.dry_run = if dry_run { sys::RUN_DRYRUN } else { sys::RUN_DEFAULT };
+        request.dry_run = if dry_run {
+            sys::RUN_DRYRUN
+        } else {
+            sys::RUN_DEFAULT
+        };
 
         sys::swupdate_async_start(
             Some(get_next_chunk),
@@ -334,7 +348,10 @@ mod tests {
         let progress = Progress::from(&msg);
 
         assert_eq!(progress.status, RUN);
-        assert_eq!((progress.cur_step, progress.nsteps, progress.cur_percent), (2, 4, 55));
+        assert_eq!(
+            (progress.cur_step, progress.nsteps, progress.cur_percent),
+            (2, 4, 55)
+        );
         assert_eq!(progress.source, sys::SOURCE_LOCAL);
         assert_eq!(progress.info, "hello");
     }

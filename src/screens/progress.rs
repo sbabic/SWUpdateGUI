@@ -25,7 +25,7 @@ struct ProgressScreen {
     screen: Screen,
 
     /* Shows current step and total number of steps, and progress of the current step.
-       Either the progress bars or the log messages are shown. */
+    Either the progress bars or the log messages are shown. */
     progress_bars: Obj,
     steps_progress: ProgressBar,
     percent_progress: ProgressBar,
@@ -34,11 +34,11 @@ struct ProgressScreen {
     log_text_area: Obj,
 
     /* The progress screen contains following buttons:
-            - OK - to close the progress screen and go back to the main screen
-            - SHOW LOGS - to show logs from swupdate program after an image update
-       When logs are shown, following buttons are displayed:
-            - BACK - to go back to the progress screen
-            - EXPORT LOGS - the export the logs to the usb */
+         - OK - to close the progress screen and go back to the main screen
+         - SHOW LOGS - to show logs from swupdate program after an image update
+    When logs are shown, following buttons are displayed:
+         - BACK - to go back to the progress screen
+         - EXPORT LOGS - the export the logs to the usb */
     actions_panel: Obj,
     ok_button: Obj,
     show_logs_button: Obj,
@@ -90,9 +90,8 @@ fn create_progress_bar(parent: Obj, text: &str) -> ProgressBar {
 
 /// Create progress screen
 pub fn create(config: &Config) {
-    let (screen, (progress_bars, log_messages, actions_panel)) = Screen::create(config, |obj| {
-        (Obj::new(obj), Obj::new(obj), Obj::new(obj))
-    });
+    let (screen, (progress_bars, log_messages, actions_panel)) =
+        Screen::create(config, |obj| (Obj::new(obj), Obj::new(obj), Obj::new(obj)));
 
     /* progress bars */
     progress_bars.set_flex_flow(sys::LV_FLEX_FLOW_COLUMN);
@@ -192,7 +191,8 @@ pub fn finish_update(success: bool) {
         if success {
             p.screen.show_notification("Success!", NotifyType::Success);
         } else {
-            p.screen.show_notification("Update failed!", NotifyType::Error);
+            p.screen
+                .show_notification("Update failed!", NotifyType::Error);
         }
         p.set_buttons_enabled(true);
     });
@@ -371,7 +371,10 @@ mod tests {
 
         assert_ne!(first, second);
         let name = first.file_name().unwrap().to_string_lossy().into_owned();
-        assert!(name.starts_with("swupdate.") && name.ends_with(".log"), "{name}");
+        assert!(
+            name.starts_with("swupdate.") && name.ends_with(".log"),
+            "{name}"
+        );
 
         std::fs::remove_dir_all(&dir).unwrap();
     }

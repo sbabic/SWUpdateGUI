@@ -177,10 +177,7 @@ mod tests {
 
     #[test]
     fn get_config_invalid_tag() {
-        assert_eq!(
-            Config::parse("FOO = bar\n"),
-            Err(InvalidTag("FOO".into()))
-        );
+        assert_eq!(Config::parse("FOO = bar\n"), Err(InvalidTag("FOO".into())));
     }
 
     #[test]
@@ -206,7 +203,10 @@ mod tests {
         assert_eq!(parse_interfaces("abc,pqr,_xyz"), ["abc", "pqr", "_xyz"]);
         assert_eq!(parse_interfaces(""), Vec::<String>::new());
 
-        let many = (0..20).map(|i| format!("eth{i}")).collect::<Vec<_>>().join(",");
+        let many = (0..20)
+            .map(|i| format!("eth{i}"))
+            .collect::<Vec<_>>()
+            .join(",");
         assert_eq!(parse_interfaces(&many).len(), IFACE_COUNT_MAX);
     }
 }
