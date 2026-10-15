@@ -2,15 +2,18 @@
 //
 // Copyright (c) 2026 Stefano Babic <stefano.babic@swupdate.org>
 //
-// Generates Rust bindings for LVGL (v9) and libswupdate and sets up linking.
+// Generates Rust bindings for LVGL (v9, v10) and libswupdate and sets up linking.
 //
-// The following environment variables can be used to locate the libraries,
-// for example when cross-compiling inside a Yocto SDK:
+// LVGL is located with pkg-config (lvgl.pc), which provides the exact compiler
+// flags LVGL was built with. Without pkg-config, or to override it, use the
+// following environment variables, for example when cross-compiling inside a
+// Yocto SDK:
 //
 //   SYSROOT / PKG_CONFIG_SYSROOT_DIR  sysroot used for default search paths
-//   LVGL_INCLUDE_DIR      directory containing `lvgl/lvgl.h` and `lvgl/lv_conf.h`
-//   LVGL_LIB_DIR          directory containing liblvgl
-//   LVGL_LIBS             comma separated libraries to link (default: "lvgl")
+//   LVGL_INCLUDE_DIR      directory containing `lvgl/lvgl.h`; disables pkg-config
+//   LVGL_LIB_DIR          directory containing liblvgl (without pkg-config)
+//   LVGL_LIBS             comma separated libraries to link, replacing the
+//                         ones from pkg-config (default: "lvgl")
 //   SWUPDATE_INCLUDE_DIR  directory containing `progress_ipc.h`, `network_ipc.h`
 //   SWUPDATE_LIB_DIR      directory containing libswupdate
 //
@@ -57,22 +60,20 @@ fn sysroot_clang_args(sysroot: &Option<PathBuf>) -> Vec<String> {
         .collect()
 }
 
-fn generate_lvgl(out: &Path, sysroot: &Option<PathBuf>) {
-    let inc = env_path("LVGL_INCLUDE_DIR")
-        .or_else(|| find_dir(&default_include_dirs(sysroot), "lvgl/lvgl.h"))
-        .expect("LVGL headers not found; set LVGL_INCLUDE_DIR");
+fn link_libs(libs: &str) {
+    for lib in libs.split(',').map(str::trim).filter(|l| !l.is_empty()) {
+        println!("cargo:rustc-link-lib={lib}");
+    }
+}
 
+/// Link setup and clang arguments for LVGL headers in `inc`, without pkg-config.
+fn lvgl_manual(inc: &Path, libs: Option<&str>) -> Vec<String> {
     if let Some(dir) = env_path("LVGL_LIB_DIR") {
         link_search(&dir);
     } else if inc.ends_with("local/include") {
         link_search(&inc.with_file_name("lib"));
     }
-
-    println!("cargo:rerun-if-env-changed=LVGL_LIBS");
-    let libs = env::var("LVGL_LIBS").unwrap_or_else(|_| "lvgl".into());
-    for lib in libs.split(',').map(str::trim).filter(|l| !l.is_empty()) {
-        println!("cargo:rustc-link-lib={lib}");
-    }
+    link_libs(libs.unwrap_or("lvgl"));
     println!("cargo:rustc-link-lib=m");
 
     let mut clang_args = vec![
@@ -85,6 +86,53 @@ fn generate_lvgl(out: &Path, sysroot: &Option<PathBuf>) {
         clang_args.push(format!("-I{}", conf_dir.display()));
         clang_args.push("-DLV_CONF_INCLUDE_SIMPLE".into());
     }
+    clang_args
+}
+
+/// Link setup and clang arguments for LVGL from pkg-config, if lvgl.pc is found.
+fn lvgl_pkg_config(libs: Option<&str>) -> Option<Vec<String>> {
+    let lib = match pkg_config::Config::new()
+        .statik(true)
+        .cargo_metadata(libs.is_none())
+        .probe("lvgl")
+    {
+        Ok(lib) => lib,
+        Err(err) => {
+            let err = err.to_string().replace('\n', " ");
+            println!("cargo:warning=lvgl not found with pkg-config, using default paths: {err}");
+            return None;
+        }
+    };
+
+    if let Some(libs) = libs {
+        lib.link_paths.iter().for_each(|dir| link_search(dir));
+        link_libs(libs);
+    }
+
+    let includes = lib
+        .include_paths
+        .iter()
+        .map(|p| format!("-I{}", p.display()));
+    let defines = lib.defines.iter().map(|(name, value)| match value {
+        Some(value) => format!("-D{name}={value}"),
+        None => format!("-D{name}"),
+    });
+    Some(includes.chain(defines).collect())
+}
+
+fn generate_lvgl(out: &Path, sysroot: &Option<PathBuf>) {
+    println!("cargo:rerun-if-env-changed=LVGL_LIBS");
+    let libs = env::var("LVGL_LIBS").ok().filter(|l| !l.is_empty());
+    let libs = libs.as_deref();
+
+    let clang_args = match env_path("LVGL_INCLUDE_DIR") {
+        Some(inc) => lvgl_manual(&inc, libs),
+        None => lvgl_pkg_config(libs).unwrap_or_else(|| {
+            let inc = find_dir(&default_include_dirs(sysroot), "lvgl/lvgl.h")
+                .expect("LVGL headers not found; set LVGL_INCLUDE_DIR");
+            lvgl_manual(&inc, libs)
+        }),
+    };
 
     let bindings = bindgen::Builder::default()
         .header("wrapper/lvgl.h")
@@ -115,6 +163,11 @@ fn generate_lvgl(out: &Path, sysroot: &Option<PathBuf>) {
         println!(
             "cargo:warning=LVGL was built without LV_USE_GRIDNAV; keypad navigation is limited"
         );
+    }
+
+    // LVGL 10 renamed LV_DISPLAY_ROTATION_* to LV_ROTATION_*
+    if text.contains("pub const LV_ROTATION_90:") {
+        println!("cargo:rustc-cfg=lvgl_rotation");
     }
 }
 
@@ -155,6 +208,7 @@ fn generate_swupdate(out: &Path, sysroot: &Option<PathBuf>) {
 
 fn main() {
     println!("cargo:rustc-check-cfg=cfg(lvgl_gridnav)");
+    println!("cargo:rustc-check-cfg=cfg(lvgl_rotation)");
     println!("cargo:rerun-if-changed=wrapper");
 
     let out = PathBuf::from(env::var("OUT_DIR").unwrap());

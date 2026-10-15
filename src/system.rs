@@ -5,7 +5,7 @@
 //
 //  - Description: Contains utility functions for system-features
 
-use crate::lv::sys;
+use crate::lv::{self, sys};
 use std::os::unix::process::ExitStatusExt;
 use std::process::Command;
 
@@ -27,12 +27,12 @@ pub fn env_settings() -> EnvSettings {
 }
 
 /// Convert angle in degrees (0, 90, 180, 270) to the LVGL rotation
-pub fn rotation_from_angle(angle: u32) -> Option<sys::lv_display_rotation_t> {
+pub fn rotation_from_angle(angle: u32) -> Option<lv::Rotation> {
     match angle {
-        0 => Some(sys::LV_DISPLAY_ROTATION_0),
-        90 => Some(sys::LV_DISPLAY_ROTATION_90),
-        180 => Some(sys::LV_DISPLAY_ROTATION_180),
-        270 => Some(sys::LV_DISPLAY_ROTATION_270),
+        0 => Some(lv::ROTATION_0),
+        90 => Some(lv::ROTATION_90),
+        180 => Some(lv::ROTATION_180),
+        270 => Some(lv::ROTATION_270),
         _ => None,
     }
 }
@@ -90,10 +90,10 @@ mod tests {
 
     #[test]
     fn rotation_valid() {
-        assert_eq!(rotation_from_angle(0), Some(sys::LV_DISPLAY_ROTATION_0));
-        assert_eq!(rotation_from_angle(90), Some(sys::LV_DISPLAY_ROTATION_90));
-        assert_eq!(rotation_from_angle(180), Some(sys::LV_DISPLAY_ROTATION_180));
-        assert_eq!(rotation_from_angle(270), Some(sys::LV_DISPLAY_ROTATION_270));
+        assert_eq!(rotation_from_angle(0), Some(lv::ROTATION_0));
+        assert_eq!(rotation_from_angle(90), Some(lv::ROTATION_90));
+        assert_eq!(rotation_from_angle(180), Some(lv::ROTATION_180));
+        assert_eq!(rotation_from_angle(270), Some(lv::ROTATION_270));
     }
 
     #[test]

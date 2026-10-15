@@ -21,6 +21,19 @@ pub const OPA_COVER: sys::lv_opa_t = 255;
 pub const LABEL_LONG_DOT: sys::lv_label_long_mode_t = 1;
 pub const LABEL_LONG_SCROLL_CIRCULAR: sys::lv_label_long_mode_t = 3;
 
+/* LVGL 10 renamed LV_DISPLAY_ROTATION_* to LV_ROTATION_* */
+#[cfg(not(lvgl_rotation))]
+pub use sys::{
+    lv_display_rotation_t as Rotation, LV_DISPLAY_ROTATION_0 as ROTATION_0,
+    LV_DISPLAY_ROTATION_180 as ROTATION_180, LV_DISPLAY_ROTATION_270 as ROTATION_270,
+    LV_DISPLAY_ROTATION_90 as ROTATION_90,
+};
+#[cfg(lvgl_rotation)]
+pub use sys::{
+    lv_rotation_t as Rotation, LV_ROTATION_0 as ROTATION_0, LV_ROTATION_180 as ROTATION_180,
+    LV_ROTATION_270 as ROTATION_270, LV_ROTATION_90 as ROTATION_90,
+};
+
 pub type EventCb = unsafe extern "C" fn(*mut sys::lv_event_t);
 
 /// Convert a Rust string into a C string, dropping interior NUL bytes.

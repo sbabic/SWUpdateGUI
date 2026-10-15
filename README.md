@@ -2,7 +2,7 @@ Documentation for this repository is located in [./doc/recovery-gui.md](./doc/re
 
 ## Building
 
-The recovery GUI is written in Rust and uses [LVGL](https://lvgl.io) 9 and the
+The recovery GUI is written in Rust and uses [LVGL](https://lvgl.io) 9 or 10 and the
 SWUpdate client library (`libswupdate`). Rust bindings for both are generated at
 build time with `bindgen`, so `libclang` must be available on the build host.
 
@@ -11,19 +11,22 @@ cargo build --release
 cargo test
 ```
 
-The libraries are searched in the sysroot (`SYSROOT` or `PKG_CONFIG_SYSROOT_DIR`),
-then in `/usr/include` and `/usr/local/include`. The search can be adjusted with:
+LVGL is located with pkg-config (`lvgl.pc`), which provides the exact compiler
+flags LVGL was built with; this matters, because the generated bindings must see
+the same `lv_conf.h` configuration as the library. Without pkg-config, the
+headers are searched in the sysroot (`SYSROOT` or `PKG_CONFIG_SYSROOT_DIR`), then
+in `/usr/include` and `/usr/local/include`. The search can be adjusted with:
 
 | Variable                   | Meaning                                                      |
 |----------------------------|--------------------------------------------------------------|
-| `LVGL_INCLUDE_DIR`         | directory containing `lvgl/lvgl.h` and `lvgl/lv_conf.h`      |
-| `LVGL_LIB_DIR`             | directory containing `liblvgl`                               |
-| `LVGL_LIBS`                | libraries to link, comma separated (default `lvgl`)          |
+| `LVGL_INCLUDE_DIR`         | directory containing `lvgl/lvgl.h`; disables pkg-config      |
+| `LVGL_LIB_DIR`             | directory containing `liblvgl` (without pkg-config)          |
+| `LVGL_LIBS`                | libraries to link, comma separated, replacing pkg-config's (default `lvgl`) |
 | `SWUPDATE_INCLUDE_DIR`     | directory containing `progress_ipc.h` and `network_ipc.h`    |
 | `SWUPDATE_LIB_DIR`         | directory containing `libswupdate`                           |
 | `BINDGEN_EXTRA_CLANG_ARGS` | extra arguments for clang, e.g. `--sysroot=...` when cross-compiling |
 
-If LVGL is a static library built with ThorVG, add the C++ runtime:
+Without pkg-config, a static LVGL built with ThorVG also needs the C++ runtime:
 `LVGL_LIBS=lvgl,stdc++`.
 
 LVGL must be built with `LV_USE_LINUX_FBDEV`, `LV_USE_EVDEV`, `LV_USE_KEYBOARD` and
