@@ -1,0 +1,25 @@
+[package]
+name = "recovery-gui"
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.77"
+description = "Recovery GUI for SWUpdate, based on LVGL"
+license = "GPL-2.0-or-later"
+build = "build.rs"
+
+[[bin]]
+name = "recovery_gui"
+path = "src/main.rs"
+
+[dependencies]
+libc = "0.2"
+log = { version = "0.4", features = ["std"] }
+
+[build-dependencies]
+bindgen = "0.72"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
