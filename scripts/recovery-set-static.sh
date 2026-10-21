@@ -98,8 +98,18 @@ set_ip_address_failed()
 	exit 1
 }
 
+stop_dhcp_client()
+{
+	for pid in $(pgrep -f "udhcpc .*-i $interface\$")
+	do
+		kill "$pid" || true
+	done
+}
+
 reconfigure_network_interface()
 {
+	# a running dhcp client would replace the static address at renewal
+	stop_dhcp_client
 	ip -4 address flush label "$interface" || set_ip_address_failed
 	ip addr add "$ip_address" dev "$interface" || set_ip_address_failed
 

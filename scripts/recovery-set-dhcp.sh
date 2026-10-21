@@ -71,8 +71,18 @@ failed_to_reconfigure_as_dhcp_client()
 	exit 1
 }
 
+stop_dhcp_client()
+{
+	for pid in $(pgrep -f "udhcpc .*-i $interface\$")
+	do
+		kill "$pid" || true
+	done
+}
+
 reconfigure_network_interface()
 {
+	# only one dhcp client per interface
+	stop_dhcp_client
 	udhcpc -n -i "$interface" || failed_to_reconfigure_as_dhcp_client
 }
 

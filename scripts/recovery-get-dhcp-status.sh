@@ -96,10 +96,17 @@ then
 	print_help
 fi
 
-# check if the ip address is found
-cmd_output=$(ip a | grep "$address") || ip_addres_is_not_found
+# check if the ip address is found, the trailing "/" avoids that
+# 192.168.1.1 matches 192.168.1.10
+cmd_output=$(ip -o -4 address show | grep " inet $address/") || ip_addres_is_not_found
 
-if ( echo "$cmd_output" | grep -q " dynamic " )
+# An address with a lease time (systemd-networkd) is flagged as "dynamic".
+# udhcpc sets the address without lease time: check whether it runs for
+# the interface.
+interface=$(echo "$cmd_output" | awk '{ print $2; exit }')
+
+if ( echo "$cmd_output" | grep -q " dynamic " ) ||
+   pgrep -f "udhcpc .*-i $interface\$" > /dev/null
 then
 	ip_addres_is_of_a_dhcp_client
 else
