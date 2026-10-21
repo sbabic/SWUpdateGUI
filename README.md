@@ -1,3 +1,19 @@
+<p align ="center"><img src=SWUpdate.svg width=400 height=400 /></p>
+
+## SWUpdateGUI - a simple GUI for SWUpdate in rescue mode
+
+The goal is to have a GUI for HMI devices when SWUpdate is started
+in rescue mode.
+
+The GUI has the following goal:
+
+- GUI must show when an update is started from one of the interface
+  and displays the progress and status.
+- It can initiate an install from a local storage as SD / USB
+- It can provide stup for SWUpdate like network interface, etc.
+- Footprint should be as small as possible to be merged into the rescue image.
+- Supported by meta-swupdate
+
 Documentation for this repository is located in [./doc/recovery-gui.md](./doc/recovery-gui.md)
 
 ## Building
@@ -35,3 +51,7 @@ without it the build prints a warning and only touch input is fully supported.
 
 The log level is set with the `RECOVERY_GUI_LOG` environment variable
 (`error`, `warn`, `info`, `debug`, `trace`; default `info`).
+
+
+## License
+This project is licensed under GPL version 2.0+.
