@@ -1,4 +1,5 @@
-<p align ="center"><img src=SWUpdate.svg width=400 height=400 /></p>
+<p align ="center"><img src=SWUpdate.svg width=100 height=100 /></p>
+<p align ="center"><img src=doc/resources/rec-gui-update-progress.drawio.png/></p>
 
 ## SWUpdateGUI - a simple GUI for SWUpdate in rescue mode
 
