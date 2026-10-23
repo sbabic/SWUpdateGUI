@@ -156,8 +156,14 @@ fn generate_lvgl(out: &Path, sysroot: &Option<PathBuf>) {
 
     // The grid navigation helper is optional in lv_conf.h. Without it the
     // GUI still works with touch, only keypad navigation is reduced.
-    let text = fs::read_to_string(&path).unwrap();
-    if text.contains("pub fn lv_gridnav_add(") {
+    // bindgen formats the bindings only if rustfmt is available (it is not
+    // in a Yocto build): compare without whitespace, so that the result
+    // does not depend on the formatting.
+    let text: String = fs::read_to_string(&path)
+        .unwrap()
+        .split_whitespace()
+        .collect();
+    if text.contains("pubfnlv_gridnav_add(") {
         println!("cargo:rustc-cfg=lvgl_gridnav");
     } else {
         println!(
@@ -166,7 +172,7 @@ fn generate_lvgl(out: &Path, sysroot: &Option<PathBuf>) {
     }
 
     // LVGL 10 renamed LV_DISPLAY_ROTATION_* to LV_ROTATION_*
-    if text.contains("pub const LV_ROTATION_90:") {
+    if text.contains("pubconstLV_ROTATION_90:") {
         println!("cargo:rustc-cfg=lvgl_rotation");
     }
 }
